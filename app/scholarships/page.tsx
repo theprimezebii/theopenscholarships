@@ -12,8 +12,9 @@ import ScholarshipCardSkeleton from '@/components/ScholarshipCardSkeleton';
 import {
   Search, Filter, X, ChevronDown, MapPin, GraduationCap,
   Globe, BookOpen, DollarSign, Clock, Briefcase,
-  Microscope, ChevronLeft, ChevronRight
+  Microscope
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface Scholarship {
   _id: string;
@@ -41,8 +42,9 @@ export default function ScholarshipsPage() {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fetchingRef = useRef(false);
-  const initialLoadDone = useRef(false);
+  const [mounted, setMounted] = useState(false);
 
+  // Derive state from URL (stable within a render)
   const selectedCountries = searchParams.get('countries')?.split(',').filter(Boolean) || [];
   const selectedDisciplines = searchParams.get('disciplines')?.split(',').filter(Boolean) || [];
   const selectedDegree = searchParams.get('degree') || '';
@@ -101,6 +103,12 @@ export default function ScholarshipsPage() {
            selectedProgramLevel !== '';
   }, [selectedCountries, selectedDisciplines, selectedDegree, selectedFunding, selectedRegion, searchQuery, selectedProgramMode, selectedProgramDuration, selectedProgramLevel]);
 
+  // Set mounted
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Fetch filter options once
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
@@ -115,44 +123,47 @@ export default function ScholarshipsPage() {
     fetchFilterOptions();
   }, []);
 
-  const buildQueryString = useCallback(() => {
-    const params = new URLSearchParams();
-    if (selectedCountries.length) params.set('countries', selectedCountries.join(','));
-    if (selectedDisciplines.length) params.set('disciplines', selectedDisciplines.join(','));
-    if (selectedDegree) params.set('degree', selectedDegree);
-    if (selectedFunding) params.set('funding', selectedFunding);
-    if (selectedRegion) params.set('region', selectedRegion);
-    if (searchQuery) params.set('search', searchQuery);
-    if (selectedProgramMode) params.set('programMode', selectedProgramMode);
-    if (selectedProgramDuration) params.set('programDuration', selectedProgramDuration);
-    if (selectedProgramLevel) params.set('programLevel', selectedProgramLevel);
-    params.set('page', currentPage.toString());
-    params.set('limit', ITEMS_PER_PAGE.toString());
-    return params.toString();
-  }, [selectedCountries, selectedDisciplines, selectedDegree, selectedFunding, selectedRegion, searchQuery, selectedProgramMode, selectedProgramDuration, selectedProgramLevel, currentPage]);
+  // Build query string and store in ref to prevent dependency churn
+ const queryString = useMemo(() => {
+  const params = new URLSearchParams();
+  if (selectedCountries.length) params.set('countries', selectedCountries.join(','));
+  if (selectedDisciplines.length) params.set('disciplines', selectedDisciplines.join(','));
+  if (selectedDegree) params.set('degree', selectedDegree);
+  if (selectedFunding) params.set('funding', selectedFunding);
+  if (selectedRegion) params.set('region', selectedRegion);
+  if (searchQuery) params.set('search', searchQuery);
+  if (selectedProgramMode) params.set('programMode', selectedProgramMode);
+  if (selectedProgramDuration) params.set('programDuration', selectedProgramDuration);
+  if (selectedProgramLevel) params.set('programLevel', selectedProgramLevel);
+  params.set('page', currentPage.toString());
+  params.set('limit', ITEMS_PER_PAGE.toString());
+  return params.toString();
+}, [selectedCountries, selectedDisciplines, selectedDegree, selectedFunding, selectedRegion, searchQuery, selectedProgramMode, selectedProgramDuration, selectedProgramLevel, currentPage]);
 
   const fetchScholarships = useCallback(async () => {
-    if (fetchingRef.current) return;
-    fetchingRef.current = true;
-    setLoading(true);
-    try {
-      const queryString = buildQueryString();
-      const res = await fetch(`/api/scholarships/filter?${queryString}`);
-      const data = await res.json();
-      setScholarships(data.scholarships || []);
-      setTotal(data.total || 0);
-    } catch (error) {
-      console.error('Failed to fetch scholarships:', error);
-    } finally {
-      setLoading(false);
-      fetchingRef.current = false;
-    }
-  }, [buildQueryString]);
+  if (!mounted || fetchingRef.current) return;
+  fetchingRef.current = true;
+  setLoading(true);
+  try {
+    const res = await fetch(`/api/scholarships/filter?${queryString}`);
+    const data = await res.json();
+    setScholarships(data.scholarships || []);
+    setTotal(data.total || 0);
+  } catch (error) {
+    console.error('Failed to fetch scholarships:', error);
+  } finally {
+    setLoading(false);
+    fetchingRef.current = false;
+  }
+}, [mounted, queryString]);
 
-  useEffect(() => {
-    fetchScholarships();
-  }, [fetchScholarships]);
+  // Fetch when the query string ref changes (i.e., filters or page change)
+ useEffect(() => {
+  if (!mounted) return;
+  fetchScholarships();
+}, [fetchScholarships, mounted]);
 
+  // Sync search input with URL
   useEffect(() => {
     setSearchInput(searchQuery);
   }, [searchQuery]);
@@ -175,7 +186,6 @@ export default function ScholarshipsPage() {
   };
 
   const clearAllFilters = () => {
-    const params = new URLSearchParams();
     router.push('/scholarships', { scroll: false });
   };
 
@@ -234,7 +244,6 @@ export default function ScholarshipsPage() {
 
   const heroImageUrl = 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format';
 
-  // Helper to normalize scholarship data for the card
   const normalizeScholarship = (s: Scholarship) => ({
     ...s,
     degreeLevel: Array.isArray(s.degreeLevel) ? s.degreeLevel : [s.degreeLevel],
