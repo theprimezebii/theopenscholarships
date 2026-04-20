@@ -544,52 +544,181 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto pb-20" style={{ backgroundColor: settings.headerBgColor || '#FFFFFF' }}>
-            <div className="px-4 py-4 space-y-2">
-              {/* Programmes Accordion */}
-              <div className="border-b border-gray-100">
-                <button onClick={() => toggleMobileSection('programmes')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
-                  <span className="flex items-center gap-3 font-medium"><GraduationCap className="w-5 h-5" /> Programmes</span>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('programmes') ? 'rotate-180' : ''}`} />
-                </button>
-                {mobileExpandedSections.has('programmes') && (
-                  <div className="pb-4 space-y-4">
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Popular Filters</h4>
-                      <div className="space-y-1">
-                        {programmesFilters.map(filter => (
-                          <Link key={filter.name} href={createFilterUrl(filter.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                            <filter.icon className="w-4 h-4 text-gray-400" />{filter.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Fields of Study</h4>
-                      <div className="space-y-1">
-                        {programmesDisciplines.slice(0, 6).map(d => (
-                          <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                            <d.icon className="w-4 h-4 text-gray-400" />{d.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                    <Link href="/scholarships" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
-                      View all programmes <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
+  <div className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto pb-20" style={{ backgroundColor: settings.headerBgColor || '#FFFFFF' }}>
+    <div className="px-4 py-4 space-y-2">
+      {/* Programmes Accordion */}
+      <div className="border-b border-gray-100">
+        <button onClick={() => toggleMobileSection('programmes')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+          <span className="flex items-center gap-3 font-medium"><GraduationCap className="w-5 h-5" /> Programmes</span>
+          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('programmes') ? 'rotate-180' : ''}`} />
+        </button>
+        {mobileExpandedSections.has('programmes') && (
+          <div className="pb-4 space-y-4">
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Popular Filters</h4>
+              <div className="space-y-1">
+                {programmesFilters.map(filter => (
+                  <Link key={filter.name} href={createFilterUrl(filter.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                    <filter.icon className="w-4 h-4 text-gray-400" />{filter.name}
+                  </Link>
+                ))}
               </div>
-              {/* Other mobile accordions (Universities, Destinations, Funding, Resources) are omitted for brevity but remain unchanged */}
-              {/* Make sure to copy them from previous complete Header.tsx if missing */}
             </div>
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
-              <Link href="/scholarships" onClick={closeMobileMenu} className="block w-full bg-gradient-to-r from-[#0B3B2F] to-[#1A5D4A] text-white px-6 py-3 rounded-xl text-center font-medium hover:shadow-lg transition-all">
-                Find Scholarships
-              </Link>
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Fields of Study</h4>
+              <div className="space-y-1">
+                {programmesDisciplines.slice(0, 6).map(d => (
+                  <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                    <d.icon className="w-4 h-4 text-gray-400" />{d.name}
+                  </Link>
+                ))}
+              </div>
             </div>
+            <Link href="/scholarships" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+              View all programmes <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         )}
+      </div>
+
+      {/* Universities Accordion */}
+      <div className="border-b border-gray-100">
+        <button onClick={() => toggleMobileSection('universities')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+          <span className="flex items-center gap-3 font-medium"><Building2 className="w-5 h-5" /> Universities</span>
+          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('universities') ? 'rotate-180' : ''}`} />
+        </button>
+        {mobileExpandedSections.has('universities') && (
+          <div className="pb-4 space-y-4">
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Location</h4>
+              <div className="space-y-1">
+                {universitiesByLocation.map(uni => (
+                  <Link key={uni.name} href={createFilterUrl(uni.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                    <uni.icon className="w-4 h-4 text-gray-400" />{uni.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <Link href="/universities" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+              Browse all universities <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* Destinations Accordion */}
+      <div className="border-b border-gray-100">
+        <button onClick={() => toggleMobileSection('destinations')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+          <span className="flex items-center gap-3 font-medium"><Globe2 className="w-5 h-5" /> Destinations</span>
+          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('destinations') ? 'rotate-180' : ''}`} />
+        </button>
+        {mobileExpandedSections.has('destinations') && (
+          <div className="pb-4 space-y-4">
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Top Destinations</h4>
+              <div className="space-y-1">
+                {destinationsPopular.map(c => (
+                  <Link key={c.name} href={createFilterUrl(c.filter)} onClick={closeMobileMenu} className="block py-2 text-sm text-gray-600">{c.name}</Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Region</h4>
+              <div className="space-y-1">
+                {destinationsRegions.map(r => (
+                  <Link key={r.name} href={createFilterUrl(r.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                    <r.icon className="w-4 h-4 text-gray-400" />{r.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <Link href="/countries" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+              Browse all countries <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* Funding Accordion */}
+      <div className="border-b border-gray-100">
+        <button onClick={() => toggleMobileSection('funding')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+          <span className="flex items-center gap-3 font-medium"><Award className="w-5 h-5" /> Funding</span>
+          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('funding') ? 'rotate-180' : ''}`} />
+        </button>
+        {mobileExpandedSections.has('funding') && (
+          <div className="pb-4 space-y-4">
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Funding Types</h4>
+              <div className="space-y-1">
+                {fundingTypes.map(t => (
+                  <Link key={t.name} href={createFilterUrl(t.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                    <t.icon className="w-4 h-4 text-gray-400" />{t.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Deadline</h4>
+              <div className="space-y-1">
+                {fundingDeadlines.map(d => (
+                  <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="block py-2 text-sm text-gray-600">{d.name}</Link>
+                ))}
+              </div>
+            </div>
+            <Link href="/calendar" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+              View calendar <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* Resources Accordion */}
+      <div className="border-b border-gray-100">
+        <button onClick={() => toggleMobileSection('resources')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+          <span className="flex items-center gap-3 font-medium"><BookOpen className="w-5 h-5" /> Resources</span>
+          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('resources') ? 'rotate-180' : ''}`} />
+        </button>
+        {mobileExpandedSections.has('resources') && (
+          <div className="pb-4 space-y-4">
+            {resourceSections.map(section => (
+              <div key={section.title}>
+                <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">{section.title}</h4>
+                <div className="space-y-1">
+                  {section.links.map(link => (
+                    <Link key={link.name} href={link.href} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                      <link.icon className="w-4 h-4 text-gray-400" />{link.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Social Links */}
+      {socialLinks.length > 0 && (
+        <div className="py-4 border-b border-gray-100">
+          <h4 className="text-xs font-semibold text-gray-400 uppercase mb-3">Follow Us</h4>
+          <div className="flex gap-4">
+            {socialLinks.map(link => (
+              <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-100 rounded-full text-gray-600 hover:bg-[#0B3B2F] hover:text-white transition-colors">
+                <link.icon className="w-5 h-5" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Mobile CTA */}
+    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+      <Link href="/scholarships" onClick={closeMobileMenu} className="block w-full bg-gradient-to-r from-[#0B3B2F] to-[#1A5D4A] text-white px-6 py-3 rounded-xl text-center font-medium hover:shadow-lg transition-all">
+        Find Scholarships
+      </Link>
+    </div>
+  </div>
+)}
       </div>
     </header>
   );
