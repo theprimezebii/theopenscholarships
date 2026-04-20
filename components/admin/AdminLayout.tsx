@@ -1,13 +1,13 @@
+// components/admin/AdminLayout.tsx
 'use client';
 
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, GraduationCap, FileText, MessageCircle, 
   Users, Mail, Award, Settings, LogOut 
 } from 'lucide-react';
-import { useEffect } from 'react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -16,16 +16,9 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { data: session } = useSession();
   const pathname = usePathname();
-
-  useEffect(() => {
-    if (status === 'unauthenticated' && pathname !== '/admin/login') {
-      router.push('/admin/login');
-    }
-  }, [status, router, pathname]);
-
+  
   const navItems = [
     { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { label: 'Scholarships', href: '/admin/scholarships', icon: GraduationCap },
@@ -36,18 +29,6 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
     { label: 'Subscribers', href: '/admin/subscribers', icon: Users },
     { label: 'Settings', href: '/admin/settings', icon: Settings },
   ];
-
-  if (status === 'loading' || (status === 'unauthenticated' && pathname !== '/admin/login')) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#0B3B2F] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
