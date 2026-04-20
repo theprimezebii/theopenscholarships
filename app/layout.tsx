@@ -5,6 +5,7 @@ import SessionProviderWrapper from '@/components/SessionProviderWrapper';
 import PlausibleAnalytics from './plausible';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteSettings from '@/models/SiteSettings';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -89,6 +90,7 @@ export default function RootLayout({
       <body className="font-sans bg-[#FAF9F7] text-[#1A1A1A] antialiased" suppressHydrationWarning>
         <PlausibleAnalytics />
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <SpeedInsights />
       </body>
     </html>
   );
