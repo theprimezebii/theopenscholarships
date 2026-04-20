@@ -143,11 +143,11 @@ export default function Footer() {
 
   return (
     <>
-      <footer 
+      <footer
         className="pt-16 pb-8"
-        style={{ 
-          backgroundColor: settings.footerBgColor || '#0B3B2F', 
-          color: settings.footerTextColor || '#FFFFFF' 
+        style={{
+          backgroundColor: settings.footerBgColor || '#0B3B2F',
+          color: settings.footerTextColor || '#FFFFFF'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,10 +156,12 @@ export default function Footer() {
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2 mb-4">
                 {footerLogo ? (
-                  <img 
-                    src={footerLogo} 
-                    alt={settings.siteName || 'Logo'} 
-                    className={settings.displayNameWithLogo ? "h-12 w-auto" : "h-14 w-auto"} 
+                  <img
+                    src={footerLogo}
+                    alt={settings.siteName || 'Logo'}
+                    className={settings.displayNameWithLogo ? "h-8 w-auto" : "h-10 w-auto"}
+                    loading="eager"
+                    fetchPriority="high"
                   />
                 ) : (
                   <div className={`bg-[#D4A373] rounded-lg flex items-center justify-center ${settings.displayNameWithLogo ? "w-8 h-8" : "w-10 h-10"}`}>
