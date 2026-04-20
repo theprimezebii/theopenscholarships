@@ -23,10 +23,17 @@ export async function generateMetadata({ params }: PageProps) {
   await connectToDatabase();
   const scholarship = await Scholarship.findOne({ slug }).lean();
   if (!scholarship) return { title: 'Scholarship Not Found' };
-  
+
   const title = `${scholarship.title} | The Open Scholarships`;
   const description = scholarship.description?.substring(0, 160) || '';
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://theopenscholarships.com'}/api/og?title=${encodeURIComponent(scholarship.title)}&description=${encodeURIComponent(description)}&type=scholarship`;
+  const funding = Array.isArray(scholarship.fundingType)
+    ? scholarship.fundingType[0]
+    : scholarship.fundingType || 'Fully Funded';
+  const host = scholarship.hostCountries?.[0] || 'Various';
+  const deadline = new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://theopenscholarships.vercel.app';
+  const ogImageUrl = `${baseUrl}/api/og?type=scholarship&title=${encodeURIComponent(scholarship.title)}&description=${encodeURIComponent(description)}&funding=${encodeURIComponent(funding)}&host=${encodeURIComponent(host)}&deadline=${encodeURIComponent(deadline)}&image=${encodeURIComponent(scholarship.image || '')}`;
 
   return {
     title,
@@ -35,14 +42,7 @@ export async function generateMetadata({ params }: PageProps) {
       title,
       description,
       type: 'website',
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: scholarship.title,
-        },
-      ],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: scholarship.title }],
     },
     twitter: {
       card: 'summary_large_image',

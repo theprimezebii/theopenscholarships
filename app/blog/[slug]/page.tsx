@@ -21,10 +21,11 @@ export async function generateMetadata({ params }: PageProps) {
   await connectToDatabase();
   const post = await BlogPost.findOne({ slug, published: true }).lean();
   if (!post) return { title: 'Post Not Found' };
-  
+
   const title = `${post.title} | The Open Scholarships`;
   const description = post.excerpt || '';
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://theopenscholarships.com'}/api/og?title=${encodeURIComponent(post.title)}&description=${encodeURIComponent(description)}&type=blog`;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://theopenscholarships.vercel.app';
+  const ogImageUrl = `${baseUrl}/api/og?type=blog&title=${encodeURIComponent(post.title)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(post.image || '')}`;
 
   return {
     title,
@@ -34,14 +35,7 @@ export async function generateMetadata({ params }: PageProps) {
       title,
       description,
       type: 'article',
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
       card: 'summary_large_image',
