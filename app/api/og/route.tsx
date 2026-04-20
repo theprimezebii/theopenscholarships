@@ -23,6 +23,12 @@ export async function GET(request: NextRequest) {
 
     const [fromColor, toColor] = gradientColors[type] || gradientColors.default;
 
+    // Validate image URL – only use if it's a proper HTTPS URL
+    let validImageUrl: string | null = null;
+    if (imageUrl && imageUrl.startsWith('https://')) {
+      validImageUrl = imageUrl;
+    }
+
     return new ImageResponse(
       (
         <div
@@ -88,13 +94,13 @@ export async function GET(request: NextRequest) {
 
             {/* Image Section */}
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {imageUrl ? (
+              {validImageUrl ? (
                 <img
-                  src={imageUrl}
+                  src={validImageUrl}
                   alt=""
+                  width="100%"
+                  height="auto"
                   style={{
-                    width: '100%',
-                    height: 'auto',
                     maxHeight: 280,
                     objectFit: 'cover',
                     borderRadius: 16,
@@ -133,6 +139,26 @@ export async function GET(request: NextRequest) {
     );
   } catch (error: any) {
     console.error('OG generation error:', error);
-    return new Response(`Failed to generate image: ${error.message}`, { status: 500 });
+    // Return a simple fallback image
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#0B3B2F',
+            color: 'white',
+            fontSize: 32,
+            fontFamily: 'Inter, sans-serif',
+          }}
+        >
+          The Open Scholarships
+        </div>
+      ),
+      { width: 1200, height: 630 }
+    );
   }
 }
