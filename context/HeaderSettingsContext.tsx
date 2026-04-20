@@ -30,9 +30,8 @@ export function HeaderSettingsProvider({
 
 export function useHeaderSettings() {
   const context = useContext(HeaderSettingsContext);
-  
-  // During SSR / build time, return safe defaults to prevent errors
-  if (typeof window === 'undefined') {
+  // 在客户端，如果 context 缺失，返回安全的默认值而不抛出错误
+  if (!context) {
     return {
       headerLogo: null,
       headerBgColor: '#FFFFFF',
@@ -40,14 +39,8 @@ export function useHeaderSettings() {
       headerNameColor1: '#0B3B2F',
       headerNameColor2: '#D4A373',
       siteName: 'TheOpenScholarships',
-      displayNameWithLogo: false, // ⬅️ Changed to false so text doesn't show by default
+      displayNameWithLogo: false,
     };
   }
-  
-  // On client, if context is missing, throw error to help debugging
-  if (!context) {
-    throw new Error('useHeaderSettings must be used within HeaderSettingsProvider');
-  }
-  
   return context;
 }
