@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useHeaderSettings } from '@/context/HeaderSettingsContext';
 import { useState, useRef, useEffect } from 'react';
 import {
   Menu, X, ChevronDown, GraduationCap, Building2, Globe2, Award, BookOpen,
@@ -119,85 +120,58 @@ const resourceSections = [
   }
 ];
 
-interface SiteSettings {
-  siteName?: string;
-  siteNameColor1?: string;
-  siteNameColor2?: string;
-  logo?: string;
-  displayNameWithLogo?: boolean;
-  headerBgColor?: string;
-  headerTextColor?: string;
-  headerLogo?: string;
-  headerNameColor1?: string;
-  headerNameColor2?: string;
-  footerBgColor?: string;
-  footerTextColor?: string;
-  footerLogo?: string;
-  footerNameColor1?: string;
-  footerNameColor2?: string;
-  whatsappChannelUrl?: string;
-  facebookPageUrl?: string;
-  twitterUrl?: string;
-  linkedinUrl?: string;
-  instagramUrl?: string;
-  showWhatsapp?: boolean;
-  showFacebook?: boolean;
-  showTwitter?: boolean;
-  showLinkedin?: boolean;
-  showInstagram?: boolean;
-}
-
 export default function Header() {
+  const headerSettings = useHeaderSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileExpandedSections, setMobileExpandedSections] = useState<Set<string>>(new Set());
-  const [settings, setSettings] = useState<SiteSettings>({});
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const fetchedRef = useRef(false);
+
+  // Social settings fetched client-side (does not affect logo flash)
+  const [socialSettings, setSocialSettings] = useState({
+    whatsappChannelUrl: '',
+    facebookPageUrl: '',
+    twitterUrl: '',
+    linkedinUrl: '',
+    instagramUrl: '',
+    showWhatsapp: false,
+    showFacebook: false,
+    showTwitter: false,
+    showLinkedin: false,
+    showInstagram: false,
+  });
 
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
-
-    const fetchSettings = async () => {
+    const fetchSocialSettings = async () => {
       try {
         const res = await fetch('/api/site-settings');
         if (res.ok) {
           const data = await res.json();
-          setSettings({
-            siteName: data.siteName,
-            siteNameColor1: data.siteNameColor1,
-            siteNameColor2: data.siteNameColor2,
-            logo: data.logo,
-            displayNameWithLogo: data.displayNameWithLogo,
-            headerBgColor: data.headerBgColor || '#FFFFFF',
-            headerTextColor: data.headerTextColor || '#1A1A1A',
-            headerLogo: data.headerLogo || data.logo,
-            headerNameColor1: data.headerNameColor1 || data.siteNameColor1 || '#0B3B2F',
-            headerNameColor2: data.headerNameColor2 || data.siteNameColor2 || '#D4A373',
-            footerBgColor: data.footerBgColor,
-            footerTextColor: data.footerTextColor,
-            footerLogo: data.footerLogo,
-            footerNameColor1: data.footerNameColor1,
-            footerNameColor2: data.footerNameColor2,
-            whatsappChannelUrl: data.whatsappChannelUrl,
-            facebookPageUrl: data.facebookPageUrl,
-            twitterUrl: data.twitterUrl,
-            linkedinUrl: data.linkedinUrl,
-            instagramUrl: data.instagramUrl,
-            showWhatsapp: data.showWhatsapp,
-            showFacebook: data.showFacebook,
-            showTwitter: data.showTwitter,
-            showLinkedin: data.showLinkedin,
-            showInstagram: data.showInstagram,
+          setSocialSettings({
+            whatsappChannelUrl: data.whatsappChannelUrl || '',
+            facebookPageUrl: data.facebookPageUrl || '',
+            twitterUrl: data.twitterUrl || '',
+            linkedinUrl: data.linkedinUrl || '',
+            instagramUrl: data.instagramUrl || '',
+            showWhatsapp: data.showWhatsapp ?? false,
+            showFacebook: data.showFacebook ?? false,
+            showTwitter: data.showTwitter ?? false,
+            showLinkedin: data.showLinkedin ?? false,
+            showInstagram: data.showInstagram ?? false,
           });
         }
       } catch (error) {
-        console.error('Failed to fetch site settings:', error);
+        console.error('Failed to fetch social settings:', error);
       }
     };
-    fetchSettings();
+    fetchSocialSettings();
   }, []);
+
+  // Merge context settings (logo/colors) with fetched social settings
+  const settings = {
+    ...headerSettings,
+    ...socialSettings,
+  };
 
   const handleMouseEnter = (name: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -251,7 +225,7 @@ export default function Header() {
 
   const { part1, part2 } = getSplitName(settings.siteName || 'TheOpenScholarships');
 
-  const headerLogo = settings.headerLogo || settings.logo;
+  const headerLogo = settings.headerLogo;
 
   return (
     <header
@@ -271,9 +245,8 @@ export default function Header() {
                 fetchPriority="high"
               />
             ) : (
-              <div className={`bg-gradient-to-br from-[#0B3B2F] to-[#1A5D4A] rounded-xl flex items-center justify-center shadow-md ${settings.displayNameWithLogo ? "w-10 h-10" : "w-12 h-12"}`}>
-                <span className={`text-white font-serif font-bold ${settings.displayNameWithLogo ? "text-2xl" : "text-3xl"}`}>O</span>
-              </div>
+              // Invisible placeholder – prevents layout shift and eliminates "O" flash
+              <div className={settings.displayNameWithLogo ? "w-10 h-10" : "w-12 h-12"} />
             )}
             {settings.displayNameWithLogo && (
               <div className="hidden sm:block">
