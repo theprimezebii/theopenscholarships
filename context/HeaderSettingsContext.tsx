@@ -1,4 +1,3 @@
-// context/HeaderSettingsContext.tsx
 'use client';
 
 import { createContext, useContext } from 'react';
@@ -31,8 +30,9 @@ export function HeaderSettingsProvider({
 
 export function useHeaderSettings() {
   const context = useContext(HeaderSettingsContext);
-  // Fallback for build-time prerendering when Provider is not available
-  if (!context) {
+  
+  // During SSR / build time, return safe defaults to prevent errors
+  if (typeof window === 'undefined') {
     return {
       headerLogo: null,
       headerBgColor: '#FFFFFF',
@@ -40,8 +40,14 @@ export function useHeaderSettings() {
       headerNameColor1: '#0B3B2F',
       headerNameColor2: '#D4A373',
       siteName: 'TheOpenScholarships',
-      displayNameWithLogo: true,
+      displayNameWithLogo: false, // ⬅️ Changed to false so text doesn't show by default
     };
   }
+  
+  // On client, if context is missing, throw error to help debugging
+  if (!context) {
+    throw new Error('useHeaderSettings must be used within HeaderSettingsProvider');
+  }
+  
   return context;
 }
