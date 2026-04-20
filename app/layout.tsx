@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import SessionProviderWrapper from '@/components/SessionProviderWrapper';
 import PlausibleAnalytics from './plausible';
+import { Analytics } from '@vercel/analytics/next';
 import { connectToDatabase } from '@/lib/mongodb';
 import SiteSettings from '@/models/SiteSettings';
 
@@ -89,6 +90,7 @@ export default function RootLayout({
       <body className="font-sans bg-[#FAF9F7] text-[#1A1A1A] antialiased" suppressHydrationWarning>
         <PlausibleAnalytics />
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <Analytics />
       </body>
     </html>
   );
