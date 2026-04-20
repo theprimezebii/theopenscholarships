@@ -18,7 +18,7 @@ import {
 } from 'react-icons/fa';
 
 // Helper function to create filter URLs
-const createFilterUrl = (params: Record<string, string>) => {
+const createFilterUrl = (params: Record<string, string | undefined>) => {
   const urlParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value) urlParams.append(key, value);
