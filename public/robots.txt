@@ -1,0 +1,14 @@
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /admin
+Disallow: /api
+
+# Host
+Host: https://theopenscholarships.com
+
+# Sitemaps
+Sitemap: https://theopenscholarships.com/sitemap.xml

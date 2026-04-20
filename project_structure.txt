@@ -1,0 +1,147 @@
+.
+├── AGENTS.md
+├── app
+│   ├── about
+│   │   └── page.tsx
+│   ├── admin
+│   │   ├── login
+│   │   │   └── page.tsx
+│   │   ├── messages
+│   │   │   └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── scholarships
+│   │   │   ├── new
+│   │   │   │   └── page.tsx
+│   │   │   └── page.tsx
+│   │   └── subscribers
+│   │       └── page.tsx
+│   ├── api
+│   │   ├── admin
+│   │   │   ├── check
+│   │   │   │   └── route.ts
+│   │   │   ├── login
+│   │   │   │   └── route.ts
+│   │   │   ├── logout
+│   │   │   │   └── route.ts
+│   │   │   └── stats
+│   │   │       └── route.ts
+│   │   ├── auth
+│   │   │   └── [...nextauth]
+│   │   ├── contact
+│   │   │   ├── messages
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   ├── filters
+│   │   │   └── route.ts
+│   │   ├── forum
+│   │   │   ├── replies
+│   │   │   │   └── route.ts
+│   │   │   └── topics
+│   │   │       ├── route.ts
+│   │   │       └── [slug]
+│   │   │           └── route.ts
+│   │   ├── scholarships
+│   │   │   ├── filter
+│   │   │   │   └── route.ts
+│   │   │   ├── [id]
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   ├── subscribe
+│   │   │   └── route.ts
+│   │   └── user
+│   │       └── saved
+│   │           └── route.ts
+│   ├── blog
+│   │   ├── complete-financial-guide-study-abroad
+│   │   │   └── page.tsx
+│   │   ├── country-comparison-study-abroad
+│   │   │   └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── scholarship-interview-guide
+│   │   │   └── page.tsx
+│   │   ├── [slug]
+│   │   │   └── page.tsx
+│   │   └── ultimate-scholarship-guide-2026
+│   │       └── page.tsx
+│   ├── calendar
+│   │   ├── CalendarClient.tsx
+│   │   └── page.tsx
+│   ├── compare
+│   │   ├── CompareClient.tsx
+│   │   └── page.tsx
+│   ├── contact
+│   │   ├── ContactForm.tsx
+│   │   └── page.tsx
+│   ├── countries
+│   │   └── page.tsx
+│   ├── disclaimer
+│   │   └── page.tsx
+│   ├── favicon.ico
+│   ├── forum
+│   │   ├── discussions
+│   │   │   └── [slug]
+│   │   │       ├── DiscussionDetail.tsx
+│   │   │       └── page.tsx
+│   │   ├── ForumClient.tsx
+│   │   ├── new
+│   │   │   ├── NewDiscussionForm.tsx
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   ├── globals.css
+│   ├── how-to-apply
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   ├── page.tsx
+│   ├── privacy
+│   │   └── page.tsx
+│   ├── resources
+│   │   └── page.tsx
+│   ├── scholarships
+│   │   ├── page.tsx
+│   │   └── [slug]
+│   │       └── page.tsx
+│   ├── stories
+│   │   └── page.tsx
+│   ├── terms
+│   │   └── page.tsx
+│   └── universities
+│       └── page.tsx
+├── CLAUDE.md
+├── components
+│   ├── CountryCard.tsx
+│   ├── FAQAccordion.tsx
+│   ├── FieldOfStudyCard.tsx
+│   ├── Footer.tsx
+│   ├── Header.tsx
+│   ├── Newsletter.tsx
+│   ├── ScholarshipCard.tsx
+│   ├── SimilarScholarships.tsx
+│   └── Toast.tsx
+├── lib
+│   └── mongodb.ts
+├── models
+│   ├── ForumReply.ts
+│   ├── ForumTopic.ts
+│   └── Scholarship.ts
+├── next.config.ts
+├── next-env.d.ts
+├── package.json
+├── package-lock.json
+├── postcss.config.mjs
+├── project_structure.txt
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── images
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+├── scripts
+│   ├── generate-hash.js
+│   └── seed-scholarships.js
+├── test-db.js
+└── tsconfig.json
+
+59 directories, 86 files
