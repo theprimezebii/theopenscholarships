@@ -1,0 +1,32 @@
+// Find the Funding dropdown section and replace it with a single column
+const fundingTypes = [
+  { name: 'Fully Funded', filter: { funding: 'Fully Funded' }, icon: Award },
+  { name: 'Partial Funding', filter: { funding: 'Partial Funding' }, icon: Sparkles },
+  { name: 'Tuition Waiver', filter: { funding: 'Tuition Waiver' }, icon: GraduationCap },
+  { name: 'Living Stipend', filter: { funding: 'Living Stipend' }, icon: HeartHandshake },
+  { name: 'Travel Grant', filter: { funding: 'Travel Grant' }, icon: Plane },
+];
+
+// In the JSX, replace the Funding dropdown block with:
+            {/* Funding */}
+            <div className="relative" onMouseEnter={() => handleMouseEnter('Funding')} onMouseLeave={handleMouseLeave}>
+              <button className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 hover:text-[#0B3B2F] ${openDropdown === 'Funding' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : 'text-gray-700'}`}>
+                <Award className="w-4 h-4" /> Funding
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openDropdown === 'Funding' ? 'rotate-180' : ''}`} />
+              </button>
+              {openDropdown === 'Funding' && (
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                  <div className="p-4">
+                    <h3 className="font-semibold text-[#0B3B2F] text-sm mb-3 px-2">Funding Types</h3>
+                    <div className="space-y-1">
+                      {fundingTypes.map((type) => (
+                        <Link key={type.name} href={createFilterUrl(type.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-2 px-3 rounded-lg">
+                          <type.icon className="w-4 h-4 text-gray-500" />
+                          <span>{type.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>

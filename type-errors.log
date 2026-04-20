@@ -1,0 +1,13 @@
+components/RichTextEditor.tsx(113,37): error TS2339: Property 'setImage' does not exist on type 'ChainedCommands'.
+components/RichTextEditor.tsx(124,55): error TS2339: Property 'setImage' does not exist on type 'ChainedCommands'.
+components/admin/RichTextEditor.tsx(103,21): error TS2353: Object literal may only specify known properties, and 'keepMarks' does not exist in type 'Partial<ListItemOptions>'.
+components/admin/RichTextEditor.tsx(106,45): error TS2353: Object literal may only specify known properties, and 'allowBase64' does not exist in type 'Partial<ImageResizeOptions>'.
+components/admin/RichTextEditor.tsx(144,37): error TS2339: Property 'setImage' does not exist on type 'ChainedCommands'.
+components/admin/RichTextEditor.tsx(155,55): error TS2339: Property 'setImage' does not exist on type 'ChainedCommands'.
+components/admin/ScholarshipForm.tsx(195,64): error TS7006: Parameter 'line' implicitly has an 'any' type.
+components/admin/ScholarshipForm.tsx(196,70): error TS7006: Parameter 'line' implicitly has an 'any' type.
+components/admin/ScholarshipForm.tsx(197,68): error TS7006: Parameter 'line' implicitly has an 'any' type.
+components/admin/ScholarshipForm.tsx(198,82): error TS7006: Parameter 'line' implicitly has an 'any' type.
+components/admin/ScholarshipForm.tsx(200,42): error TS7006: Parameter 'f' implicitly has an 'any' type.
+components/admin/ScholarshipForm.tsx(383,33): error TS7006: Parameter 'faq' implicitly has an 'any' type.
+components/admin/ScholarshipForm.tsx(383,38): error TS7006: Parameter 'index' implicitly has an 'any' type.

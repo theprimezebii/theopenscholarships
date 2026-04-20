@@ -1,0 +1,322 @@
+import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import Newsletter from '@/components/Newsletter';
+import ScholarshipCard from '@/components/ScholarshipCard';
+import { connectToDatabase } from '@/lib/mongodb';
+import Scholarship from '@/models/Scholarship';
+import BlogPost from '@/models/BlogPost';
+import SearchBar from '@/components/SearchBar';
+import { 
+  Search, 
+  GraduationCap, 
+  MapPin, 
+  Building2, 
+  Users, 
+  BookOpen,
+  ArrowRight,
+  TrendingUp,
+  Calendar,
+  FileText,
+  ChevronRight
+} from 'lucide-react';
+
+function formatStudentsHelped(totalViews: number): string {
+  if (totalViews >= 5000) return `${Math.floor(totalViews / 1000)}K+`;
+  if (totalViews >= 1000) return `${Math.floor(totalViews / 1000)}K+`;
+  if (totalViews >= 500) return '500+';
+  if (totalViews >= 200) return '200+';
+  if (totalViews >= 100) return '100+';
+  return '100+';
+}
+
+export default async function Home() {
+  await connectToDatabase();
+  
+  const allScholarships = await Scholarship.find({}).lean();
+  
+  const totalScholarships = allScholarships.length;
+  const featuredScholarships = allScholarships.filter(s => s.featured && s.status === 'open').slice(0, 6);
+  
+  const uniqueProviders = new Set(allScholarships.map(s => s.provider).filter(Boolean));
+  const universitiesCount = uniqueProviders.size;
+  
+  const allHostCountries = allScholarships.flatMap(s => s.hostCountries || []);
+  const uniqueCountries = new Set(allHostCountries);
+  const countriesCount = uniqueCountries.size;
+  
+  const totalViews = allScholarships.reduce((sum, s) => sum + (s.views || 0), 0);
+  const studentsHelped = formatStudentsHelped(totalViews);
+  
+  const blogPosts = await BlogPost.find({ published: true })
+    .sort({ createdAt: -1 })
+    .limit(4)
+    .lean();
+  
+  const fieldsOfStudy = [
+    { name: 'Business & Management', image: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Computer Science & IT', image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Engineering & Technology', image: 'https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Medicine & Health', image: 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Social Sciences', image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Arts & Design', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Education & Training', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=160&fit=crop', count: 0 },
+    { name: 'Law', image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=160&fit=crop', count: 0 },
+  ];
+  
+  fieldsOfStudy.forEach(field => {
+    field.count = allScholarships.filter(s => s.fields?.includes(field.name)).length;
+  });
+  
+  const popularCountries = [
+    { name: 'United Kingdom', image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=200&fit=crop', count: 0 },
+    { name: 'United States', image: 'https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=400&h=200&fit=crop', count: 0 },
+    { name: 'Germany', image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400&h=200&fit=crop', count: 0 },
+    { name: 'Canada', image: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=400&h=200&fit=crop', count: 0 },
+  ];
+  
+  popularCountries.forEach(country => {
+    country.count = allScholarships.filter(s => s.hostCountries?.includes(country.name)).length;
+  });
+
+  return (
+    <>
+      <Header />
+      <main>
+        {/* Hero Section */}
+        <section className="relative bg-gradient-to-br from-[#0B3B2F] via-[#1A5D4A] to-[#0B3B2F] text-white overflow-hidden">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute top-20 right-10 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-80 h-80 bg-[#D4A373]/10 rounded-full blur-3xl"></div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+            <div className="max-w-3xl">
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                Find Your Perfect{' '}
+                <span className="text-[#D4A373]">Fully Funded</span>
+                <br />
+                Scholarship Abroad
+              </h1>
+              
+              <p className="text-lg text-white/80 mb-8 max-w-2xl">
+                Discover verified scholarships from top universities worldwide. 
+                Search by country, field of study, or degree level—all completely free.
+              </p>
+              
+              <form action="/scholarships" method="GET" className="max-w-2xl">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input 
+                      type="text" 
+                      name="search" 
+                      placeholder="Search by scholarship, country, or field..." 
+                      className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 placeholder-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-[#D4A373]"
+                    />
+                  </div>
+                  <button type="submit" className="bg-[#D4A373] text-[#0B3B2F] px-8 py-4 rounded-xl font-semibold hover:bg-[#C67B5E] transition-colors shadow-lg flex items-center justify-center gap-2">
+                    <Search className="w-4 h-4" />
+                    Search
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="bg-white py-12 border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="group">
+                <GraduationCap className="w-8 h-8 text-[#0B3B2F] mx-auto mb-3 group-hover:text-[#D4A373] transition-colors" />
+                <div className="text-3xl md:text-4xl font-bold text-[#0B3B2F]">{totalScholarships}</div>
+                <div className="text-sm text-gray-500 mt-1">Scholarships</div>
+              </div>
+              <div className="group">
+                <MapPin className="w-8 h-8 text-[#0B3B2F] mx-auto mb-3 group-hover:text-[#D4A373] transition-colors" />
+                <div className="text-3xl md:text-4xl font-bold text-[#0B3B2F]">{countriesCount}</div>
+                <div className="text-sm text-gray-500 mt-1">Countries</div>
+              </div>
+              <div className="group">
+                <Building2 className="w-8 h-8 text-[#0B3B2F] mx-auto mb-3 group-hover:text-[#D4A373] transition-colors" />
+                <div className="text-3xl md:text-4xl font-bold text-[#0B3B2F]">{universitiesCount}+</div>
+                <div className="text-sm text-gray-500 mt-1">Universities</div>
+              </div>
+              <div className="group">
+                <Users className="w-8 h-8 text-[#0B3B2F] mx-auto mb-3 group-hover:text-[#D4A373] transition-colors" />
+                <div className="text-3xl md:text-4xl font-bold text-[#0B3B2F]">{studentsHelped}</div>
+                <div className="text-sm text-gray-500 mt-1">Students Helped</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Fields of Study Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="font-serif text-3xl md:text-4xl text-[#1A1A1A] mb-3">Search by Field of Study</h2>
+              <p className="text-gray-500 max-w-2xl mx-auto">Compare scholarships across every subject area</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {fieldsOfStudy.map((field) => (
+                <Link key={field.name} href={`/scholarships?disciplines=${encodeURIComponent(field.name)}`}>
+                  <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-200 h-full flex flex-col">
+                    <div className="h-32 bg-cover bg-center flex-shrink-0" style={{ backgroundImage: `url(${field.image})`, backgroundColor: '#e2e8f0' }}></div>
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h3 className="font-semibold text-[#1A1A1A] group-hover:text-[#0B3B2F] transition-colors">{field.name}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{field.count} scholarships</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <Link href="/scholarships" className="inline-flex items-center gap-2 text-[#0B3B2F] font-medium hover:text-[#D4A373] transition-colors">
+                View All Fields of Study
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="font-serif text-3xl md:text-4xl text-[#1A1A1A] mb-3">How It Works</h2>
+              <p className="text-gray-500">Four simple steps to your dream scholarship</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {[
+                { step: 1, title: 'Explore', desc: 'Browse programmes worldwide', icon: Search },
+                { step: 2, title: 'Compare', desc: 'Make a wishlist', icon: TrendingUp },
+                { step: 3, title: 'Decide', desc: 'Pick the best fit', icon: FileText },
+                { step: 4, title: 'Apply', desc: 'Submit with confidence', icon: Calendar },
+              ].map((item) => (
+                <div key={item.step} className="group">
+                  <div className="w-16 h-16 bg-[#0B3B2F]/5 group-hover:bg-[#0B3B2F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 transition-colors">
+                    <item.icon className="w-7 h-7 text-[#0B3B2F]" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                  <p className="text-sm text-gray-500">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Scholarships */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <h2 className="font-serif text-3xl md:text-4xl text-[#1A1A1A] mb-2">Featured Scholarships</h2>
+                <p className="text-gray-500">Top opportunities from around the world</p>
+              </div>
+              <Link href="/scholarships" className="text-[#0B3B2F] font-medium hover:text-[#D4A373] transition-colors flex items-center gap-1">
+                View all <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            
+            {featuredScholarships.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                <GraduationCap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No featured scholarships yet</h3>
+                <p className="text-gray-500">Check back soon for featured opportunities!</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredScholarships.map((scholarship: any) => (
+                  <ScholarshipCard key={scholarship._id} scholarship={scholarship} featured={true} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Popular Destinations */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="font-serif text-3xl md:text-4xl text-[#1A1A1A] mb-3">Popular Destinations</h2>
+              <p className="text-gray-500">Explore scholarships in top study destinations</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {popularCountries.map((country) => (
+                <Link key={country.name} href={`/scholarships?countries=${encodeURIComponent(country.name)}`}>
+                  <div className="group relative h-40 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${country.image})`, backgroundColor: '#e2e8f0' }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h3 className="text-white font-semibold text-lg">{country.name}</h3>
+                      <p className="text-white/80 text-sm">{country.count} scholarships</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Blog Section - Fixed Equal Heights */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <h2 className="font-serif text-3xl md:text-4xl text-[#1A1A1A] mb-2">Latest from Our Blog</h2>
+                <p className="text-gray-500">Expert advice and guides for your scholarship journey</p>
+              </div>
+              <Link href="/blog" className="text-[#0B3B2F] font-medium hover:text-[#D4A373] transition-colors flex items-center gap-1">
+                View all articles <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            
+            {blogPosts.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">No articles yet</h3>
+                <p className="text-gray-500">Check back soon for helpful guides and tips!</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {blogPosts.map((post: any) => (
+                  <Link key={post._id} href={`/blog/${post.slug}`} className="block h-full">
+                    <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-200 h-full flex flex-col">
+                      {post.image ? (
+                        <div className="h-48 bg-cover bg-center flex-shrink-0" style={{ backgroundImage: `url(${post.image})`, backgroundColor: '#e2e8f0' }}></div>
+                      ) : (
+                        <div className="h-48 bg-gradient-to-br from-[#0B3B2F] to-[#1A5D4A] flex items-center justify-center flex-shrink-0">
+                          <BookOpen className="w-12 h-12 text-white/30" />
+                        </div>
+                      )}
+                      <div className="p-5 flex-1 flex flex-col">
+                        <div className="flex items-center gap-2 mb-3 h-6">
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{post.category}</span>
+                          <span className="text-xs text-gray-400">{post.readTime}</span>
+                        </div>
+                        <h3 className="font-semibold text-[#1A1A1A] mb-2 line-clamp-2 h-12 group-hover:text-[#0B3B2F] transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="text-gray-500 text-sm line-clamp-2 mb-4 h-10">{post.excerpt}</p>
+                        <div className="flex-1"></div>
+                        <span className="text-[#0B3B2F] text-sm font-medium group-hover:text-[#D4A373] transition-colors inline-flex items-center gap-1 h-6">
+                          Read more
+                          <ChevronRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <Newsletter />
+      </main>
+      <Footer />
+    </>
+  );
+}
