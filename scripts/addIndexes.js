@@ -32,7 +32,7 @@ async function createIndexes() {
     await client.connect();
     console.log('✅ Connected');
     
-    const db = client.db('fundedworld'); // Your database name
+    const db = client.db('theopenscholarships'); // Your database name
     const collection = db.collection('scholarships');
     
     console.log('\n📊 Creating indexes on scholarships collection...\n');

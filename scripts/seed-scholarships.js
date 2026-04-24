@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const uri = 'mongodb+srv://theprimezebii:Allah786allah@fundedworld-admin.9zxfvms.mongodb.net/fundedworld?retryWrites=true&w=majority';
+const uri = 'mongodb+srv://theprimezebii:Allah786allah@theopenscholarships-admin.9zxfvms.mongodb.net/theopenscholarships?retryWrites=true&w=majority';
 
 const scholarships = [
   {

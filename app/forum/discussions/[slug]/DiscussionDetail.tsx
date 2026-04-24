@@ -32,8 +32,8 @@ interface Reply {
 }
 
 const STORAGE_KEYS = {
-  topicLikes: 'fundedworld_topic_likes',
-  replyLikes: 'fundedworld_reply_likes',
+  topicLikes: 'theopenscholarships_topic_likes',
+  replyLikes: 'theopenscholarships_reply_likes',
 };
 
 export default function DiscussionDetail({ initialTopic, slug }: { initialTopic: Topic; slug: string }) {

@@ -7,7 +7,7 @@ import StatCard from '@/components/StatCard';
 export const metadata = {
   title: 'About TheOpenScholarships | Scholarship Platform for Developing Countries',
   description: 'TheOpenScholarships helps students from developing countries discover fully funded scholarships. Learn about our mission, story, and impact.',
-  keywords: 'about fundedworld, scholarship platform, study abroad help, education funding',
+  keywords: 'about theopenscholarships, scholarship platform, study abroad help, education funding',
 };
 
 export default async function About() {
