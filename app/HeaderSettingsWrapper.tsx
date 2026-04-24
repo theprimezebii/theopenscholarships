@@ -2,8 +2,20 @@
 import { useEffect, useState } from 'react';
 import { HeaderSettingsProvider } from '@/context/HeaderSettingsContext';
 
+interface SiteSettings {
+  headerLogo?: string;
+  headerBgColor?: string;
+  headerTextColor?: string;
+  headerNameColor1?: string;
+  headerNameColor2?: string;
+  displayNameWithLogo?: boolean;
+  siteName?: string;
+  favicon?: string;
+  [key: string]: any;
+}
+
 export default function HeaderSettingsWrapper({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<any>({
+  const [settings, setSettings] = useState<SiteSettings>({
     headerLogo: '',
     headerBgColor: '#FFFFFF',
     headerTextColor: '#1A1A1A',
@@ -18,7 +30,6 @@ export default function HeaderSettingsWrapper({ children }: { children: React.Re
       .then(res => res.json())
       .then(data => {
         setSettings(prev => ({ ...prev, ...data }));
-        // Dynamically set favicon
         if (data.favicon && data.favicon.trim()) {
           let link = document.querySelector("link[rel~='icon']");
           if (!link) {
