@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import './globals.css';
-import { HeaderSettingsProvider } from '@/context/HeaderSettingsContext';
+import HeaderSettingsWrapper from './HeaderSettingsWrapper';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     template: '%s | The Open Scholarships',
   },
   description: 'Find your perfect fully funded scholarship abroad. Discover verified opportunities from top universities – free, no ads, completely accessible.',
+  icons: {
+    icon: '/favicon.svg',  // default – will be overridden dynamically if an uploaded favicon exists
+  },
   openGraph: {
     title: 'The Open Scholarships – Fully Funded Opportunities',
     description: 'Search by country, field of study, or degree level. Thousands of verified scholarships for Bachelor, Master, and PhD programs.',
@@ -47,9 +50,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans antialiased">
-        <HeaderSettingsProvider>
+        <HeaderSettingsWrapper>
           {children}
-        </HeaderSettingsProvider>
+        </HeaderSettingsWrapper>
       </body>
     </html>
   );
