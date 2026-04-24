@@ -1,4 +1,3 @@
-// app/courses/CoursesContent.tsx
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -120,7 +119,7 @@ export default function CoursesContent() {
     router.push(`/courses?${params.toString()}`, { scroll: false });
   };
 
-  // Real‑time search with debounce (500ms)
+  // Real‑time search with debounce
   const handleSearchInput = (value: string) => {
     setSearchInput(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -140,7 +139,12 @@ export default function CoursesContent() {
     selectedCategories.length + selectedPlatforms.length + selectedLanguages.length +
     (selectedLevel ? 1 : 0) + (certificateFilter ? 1 : 0) + (ratingFilter ? 1 : 0) + (searchQuery ? 1 : 0);
 
-  // Click outside dropdown
+  // Handle dropdown toggling – prevent event propagation issues
+  const toggleDropdown = (name: string) => {
+    setOpenDropdown(openDropdown === name ? null : name);
+  };
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -153,8 +157,16 @@ export default function CoursesContent() {
 
   return (
     <>
-      {/* Hero */}
-      <div className="relative text-white py-12 md:py-16 bg-gradient-to-r from-[#0B3B2F] to-[#1A5D4A]">
+      {/* Hero with background image and gradient overlay */}
+      <div
+        className="relative text-white py-12 md:py-16"
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(11, 59, 47, 0.85), rgba(26, 93, 74, 0.85)), url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1920&auto=format')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundColor: '#0B3B2F'
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="font-serif text-3xl md:text-5xl font-bold mb-3">Free Online Courses</h1>
           <p className="text-white/80 text-lg">Learn from top institutions worldwide, completely free</p>
@@ -162,7 +174,7 @@ export default function CoursesContent() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search bar – real‑time on input */}
+        {/* Search bar */}
         <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
@@ -175,7 +187,6 @@ export default function CoursesContent() {
                 className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#D4A373] bg-gray-50 text-sm"
               />
             </div>
-            {/* Optional: keep the button but it's no longer necessary – you can remove it if you want pure real‑time */}
             <button
               onClick={() => updateUrl({ search: searchInput || null, page: '1' })}
               className="bg-[#0B3B2F] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#1A5D4A] transition-colors flex items-center justify-center gap-2"
@@ -184,16 +195,18 @@ export default function CoursesContent() {
             </button>
           </div>
 
-          {/* Desktop Filters (unchanged layout) */}
+          {/* Desktop Filters */}
           <div className="hidden lg:block mt-4">
             <div ref={dropdownRef} className="flex flex-wrap gap-3">
               {/* Category */}
               <div className="relative">
-                <button onClick={() => setOpenDropdown(openDropdown === 'category' ? null : 'category')}
-                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap">
+                <button
+                  onClick={() => toggleDropdown('category')}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap"
+                >
                   <BookOpen className="w-4 h-4 text-gray-500" />
                   Category {selectedCategories.length > 0 && `(${selectedCategories.length})`}
-                  <ChevronDown className={`w-4 h-4 transition ${openDropdown === 'category' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === 'category' ? 'rotate-180' : ''}`} />
                 </button>
                 {openDropdown === 'category' && (
                   <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50 max-h-64 overflow-y-auto">
@@ -208,11 +221,13 @@ export default function CoursesContent() {
 
               {/* Platform */}
               <div className="relative">
-                <button onClick={() => setOpenDropdown(openDropdown === 'platform' ? null : 'platform')}
-                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap">
+                <button
+                  onClick={() => toggleDropdown('platform')}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap"
+                >
                   <Globe className="w-4 h-4 text-gray-500" />
                   Platform {selectedPlatforms.length > 0 && `(${selectedPlatforms.length})`}
-                  <ChevronDown className={`w-4 h-4 transition ${openDropdown === 'platform' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === 'platform' ? 'rotate-180' : ''}`} />
                 </button>
                 {openDropdown === 'platform' && (
                   <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50 max-h-64 overflow-y-auto">
@@ -227,11 +242,13 @@ export default function CoursesContent() {
 
               {/* Language */}
               <div className="relative">
-                <button onClick={() => setOpenDropdown(openDropdown === 'language' ? null : 'language')}
-                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap">
+                <button
+                  onClick={() => toggleDropdown('language')}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap"
+                >
                   <Globe className="w-4 h-4 text-gray-500" />
                   Language {selectedLanguages.length > 0 && `(${selectedLanguages.length})`}
-                  <ChevronDown className={`w-4 h-4 transition ${openDropdown === 'language' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === 'language' ? 'rotate-180' : ''}`} />
                 </button>
                 {openDropdown === 'language' && (
                   <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50 max-h-64 overflow-y-auto">
@@ -246,11 +263,13 @@ export default function CoursesContent() {
 
               {/* Level */}
               <div className="relative">
-                <button onClick={() => setOpenDropdown(openDropdown === 'level' ? null : 'level')}
-                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap">
+                <button
+                  onClick={() => toggleDropdown('level')}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap"
+                >
                   <BookOpen className="w-4 h-4 text-gray-500" />
                   {selectedLevel || 'All Levels'}
-                  <ChevronDown className={`w-4 h-4 transition ${openDropdown === 'level' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === 'level' ? 'rotate-180' : ''}`} />
                 </button>
                 {openDropdown === 'level' && (
                   <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
@@ -270,11 +289,13 @@ export default function CoursesContent() {
 
               {/* Certificate */}
               <div className="relative">
-                <button onClick={() => setOpenDropdown(openDropdown === 'certificate' ? null : 'certificate')}
-                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap">
+                <button
+                  onClick={() => toggleDropdown('certificate')}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap"
+                >
                   <Award className="w-4 h-4 text-gray-500" />
                   {certificateFilter === 'true' ? 'With Certificate' : certificateFilter === 'false' ? 'Without Certificate' : 'Certificate'}
-                  <ChevronDown className={`w-4 h-4 transition ${openDropdown === 'certificate' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === 'certificate' ? 'rotate-180' : ''}`} />
                 </button>
                 {openDropdown === 'certificate' && (
                   <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
@@ -290,11 +311,13 @@ export default function CoursesContent() {
 
               {/* Rating */}
               <div className="relative">
-                <button onClick={() => setOpenDropdown(openDropdown === 'rating' ? null : 'rating')}
-                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap">
+                <button
+                  onClick={() => toggleDropdown('rating')}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm whitespace-nowrap"
+                >
                   <Star className="w-4 h-4 text-gray-500" />
                   {ratingFilter ? `≥ ${ratingFilter} stars` : 'Any Rating'}
-                  <ChevronDown className={`w-4 h-4 transition ${openDropdown === 'rating' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === 'rating' ? 'rotate-180' : ''}`} />
                 </button>
                 {openDropdown === 'rating' && (
                   <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
@@ -340,7 +363,7 @@ export default function CoursesContent() {
           </div>
         </div>
 
-        {/* Mobile Active Filters */}
+        {/* Mobile Active Filters (same as before) */}
         {totalFiltersApplied > 0 && (
           <div className="lg:hidden flex flex-wrap gap-2 mb-4">
             {selectedCategories.map(c => (
@@ -359,7 +382,7 @@ export default function CoursesContent() {
           </div>
         )}
 
-        {/* Results – with skeleton */}
+        {/* Results */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => <CourseCardSkeleton key={i} />)}
@@ -376,7 +399,7 @@ export default function CoursesContent() {
         )}
       </div>
 
-      {/* Sticky Filter Button */}
+      {/* Sticky Filter Button (mobile) */}
       <div className="lg:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
         <button onClick={() => setShowMobileFilters(true)}
           className="bg-[#0B3B2F] text-white px-6 py-3 rounded-lg font-medium shadow-lg flex items-center gap-2">
@@ -384,7 +407,7 @@ export default function CoursesContent() {
         </button>
       </div>
 
-      {/* Mobile Filter Drawer */}
+      {/* Mobile Filter Drawer (unchanged) */}
       {showMobileFilters && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileFilters(false)} />
