@@ -16,32 +16,42 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Helper to convert any Mongoose document to plain object
+function toPlainObject<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}
+
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   await connectToDatabase();
-  const post = await BlogPost.findOne({ slug, published: true }).lean();
-  if (!post) return { title: 'Post Not Found' };
+  const postRaw = await BlogPost.findOne({ slug, published: true }).lean();
+  if (!postRaw) return { title: 'Post Not Found' };
+  const post = toPlainObject(postRaw);
 
-  const title = `${post.title} | The Open Scholarships`;
-  const description = post.excerpt || '';
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://theopenscholarships.vercel.app';
-  const ogImageUrl = `${baseUrl}/api/og?type=blog&title=${encodeURIComponent(post.title)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(post.image || '')}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const ogUrl = new URL(`${baseUrl}/api/og`);
+  ogUrl.searchParams.set('title', post.title);
+  ogUrl.searchParams.set('description', post.excerpt || post.content?.substring(0, 150) || '');
+  ogUrl.searchParams.set('type', 'blog');
+  ogUrl.searchParams.set('host', post.author);
+  if (post.readTime) ogUrl.searchParams.set('duration', post.readTime);
 
   return {
-    title,
-    description,
-    keywords: post.tags?.join(', '),
+    title: `${post.title} | The Open Scholarships Blog`,
+    description: post.excerpt || '',
     openGraph: {
-      title,
-      description,
+      title: post.title,
+      description: post.excerpt,
+      url: `${baseUrl}/blog/${post.slug}`,
+      siteName: 'The Open Scholarships',
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630 }],
       type: 'article',
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImageUrl],
+      title: post.title,
+      description: post.excerpt,
+      images: [ogUrl.toString()],
     },
   };
 }
@@ -49,16 +59,16 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   await connectToDatabase();
-  
-  const post = await BlogPost.findOne({ slug }).lean();
-  
-  if (!post) {
-    notFound();
-  }
-  
+
+  const postRaw = await BlogPost.findOne({ slug }).lean();
+  if (!postRaw) notFound();
+
+  // Convert the entire post to plain object (removes all ObjectId instances)
+  const post = toPlainObject(postRaw);
+
   await BlogPost.updateOne({ slug }, { $inc: { views: 1 } });
-  
-  const relatedPosts = await BlogPost.find({
+
+  const relatedPostsRaw = await BlogPost.find({
     _id: { $ne: post._id },
     published: true,
     type: { $ne: 'guide' },
@@ -67,6 +77,13 @@ export default async function BlogPostPage({ params }: PageProps) {
       { tags: { $in: post.tags || [] } }
     ]
   }).limit(3).lean();
+  const relatedPosts = relatedPostsRaw.map(p => toPlainObject(p));
+
+  // Sanitize faqs (though toPlainObject already did, we keep for clarity)
+  const plainFaqs = post.faqs?.map((faq: any) => ({
+    question: faq.question,
+    answer: faq.answer,
+  })) || [];
 
   const heroBackgroundStyle = post.image
     ? {
@@ -121,11 +138,11 @@ export default async function BlogPostPage({ params }: PageProps) {
               <PrintButton />
             </div>
           </div>
-          
+
           <article className="prose prose-lg max-w-none">
             <BlogContent content={post.content} />
           </article>
-          
+
           {post.tags && post.tags.length > 0 && (
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
@@ -141,13 +158,13 @@ export default async function BlogPostPage({ params }: PageProps) {
               </div>
             </div>
           )}
-          
-          {post.faqs && post.faqs.length > 0 && (
+
+          {plainFaqs.length > 0 && (
             <div className="mt-8">
-              <FaqAccordion items={post.faqs} />
+              <FaqAccordion items={plainFaqs} />
             </div>
           )}
-          
+
           {relatedPosts.length > 0 && (
             <div className="mt-12 pt-8 border-t border-gray-200">
               <h2 className="font-serif text-2xl font-semibold mb-6">Related Articles</h2>
@@ -171,7 +188,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
           )}
         </div>
-        
+
         <Newsletter />
       </main>
       <Footer />

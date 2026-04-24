@@ -37,6 +37,7 @@ const programmesFilters = [
   { name: 'Research Programmes', filter: { programLevel: 'research' }, icon: Microscope },
 ];
 
+// All 10 disciplines (now all in one column)
 const programmesDisciplines = [
   { name: 'Business & Management', filter: { disciplines: 'Business & Management' }, icon: TrendingUp },
   { name: 'Computer Science & IT', filter: { disciplines: 'Computer Science & IT' }, icon: Cpu },
@@ -118,6 +119,16 @@ const resourceSections = [
       { name: 'Contact', href: '/contact', icon: Mail },
     ]
   }
+];
+
+// Free Courses Dropdown Content
+const freeCoursePlatforms = [
+  { name: 'Coursera', filter: { platform: 'Coursera' }, icon: BookOpen },
+  { name: 'edX', filter: { platform: 'edX' }, icon: BookOpen },
+  { name: 'FutureLearn', filter: { platform: 'FutureLearn' }, icon: BookOpen },
+  { name: 'Udemy', filter: { platform: 'Udemy' }, icon: BookOpen },
+  { name: 'Google Digital Garage', filter: { platform: 'Google Digital Garage' }, icon: BookOpen },
+  { name: 'Microsoft', filter: { platform: 'Microsoft Learn' }, icon: BookOpen },
 ];
 
 export default function Header() {
@@ -261,7 +272,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center justify-center flex-1 gap-0.5 mx-4">
-            {/* Programmes */}
+            {/* Programmes (UPDATED: two columns only, link under second column) */}
             <div className="relative" onMouseEnter={() => handleMouseEnter('Programmes')} onMouseLeave={handleMouseLeave}>
               <button
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 ${openDropdown === 'Programmes' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : ''}`}
@@ -271,37 +282,31 @@ export default function Header() {
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openDropdown === 'Programmes' ? 'rotate-180' : ''}`} />
               </button>
               {openDropdown === 'Programmes' && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[900px] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                  <div className="grid grid-cols-3 gap-0">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[700px] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                  <div className="grid grid-cols-2 gap-0">
+
+                    {/* Column 2: Fields of Study (all 10 disciplines) + link at bottom */}
                     <div className="p-6 border-r border-gray-100">
+
+                      <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">Fields of Study</h3>
+                      <div className="space-y-2">
+                        {programmesDisciplines.map((discipline) => (
+                          <Link key={discipline.name} href={createFilterUrl(discipline.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
+                            <discipline.icon className="w-4 h-4 text-gray-500" />
+                            <span>{discipline.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+
+                    </div>
+                    {/* Column 1: Popular Filters */}
+                    <div className="p-6">
                       <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">Popular Filters</h3>
                       <div className="space-y-2">
                         {programmesFilters.map((filter) => (
                           <Link key={filter.name} href={createFilterUrl(filter.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
                             <filter.icon className="w-4 h-4 text-gray-500" />
                             <span>{filter.name}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="p-6 border-r border-gray-100">
-                      <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">Fields of Study</h3>
-                      <div className="space-y-2">
-                        {programmesDisciplines.slice(0, 6).map((discipline) => (
-                          <Link key={discipline.name} href={createFilterUrl(discipline.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
-                            <discipline.icon className="w-4 h-4 text-gray-500" />
-                            <span>{discipline.name}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">More Fields</h3>
-                      <div className="space-y-2">
-                        {programmesDisciplines.slice(6, 10).map((discipline) => (
-                          <Link key={discipline.name} href={createFilterUrl(discipline.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
-                            <discipline.icon className="w-4 h-4 text-gray-500" />
-                            <span>{discipline.name}</span>
                           </Link>
                         ))}
                       </div>
@@ -314,7 +319,7 @@ export default function Header() {
               )}
             </div>
 
-            {/* Universities */}
+            {/* Universities (unchanged) */}
             <div className="relative" onMouseEnter={() => handleMouseEnter('Universities')} onMouseLeave={handleMouseLeave}>
               <button
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 ${openDropdown === 'Universities' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : ''}`}
@@ -327,23 +332,23 @@ export default function Header() {
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[700px] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
                   <div className="grid grid-cols-2 gap-0">
                     <div className="p-6 border-r border-gray-100">
-                      <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">By Location</h3>
-                      <div className="space-y-2">
-                        {universitiesByLocation.map((uni) => (
-                          <Link key={uni.name} href={createFilterUrl(uni.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
-                            <uni.icon className="w-4 h-4 text-gray-500" />
-                            <span>{uni.name}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="p-6">
                       <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">By Discipline</h3>
                       <div className="space-y-2">
                         {universitiesByDiscipline.map((discipline) => (
                           <Link key={discipline.name} href={createFilterUrl(discipline.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
                             <discipline.icon className="w-4 h-4 text-gray-500" />
                             <span>{discipline.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <h3 className="font-semibold text-[#0B3B2F] text-sm mb-4">By Location</h3>
+                      <div className="space-y-2">
+                        {universitiesByLocation.map((uni) => (
+                          <Link key={uni.name} href={createFilterUrl(uni.filter)} onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-1.5 px-2 rounded-lg">
+                            <uni.icon className="w-4 h-4 text-gray-500" />
+                            <span>{uni.name}</span>
                           </Link>
                         ))}
                       </div>
@@ -356,7 +361,7 @@ export default function Header() {
               )}
             </div>
 
-            {/* Destinations */}
+            {/* Destinations (unchanged) */}
             <div className="relative" onMouseEnter={() => handleMouseEnter('Destinations')} onMouseLeave={handleMouseLeave}>
               <button
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 ${openDropdown === 'Destinations' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : ''}`}
@@ -397,7 +402,7 @@ export default function Header() {
               )}
             </div>
 
-            {/* Funding */}
+            {/* Funding (unchanged) */}
             <div className="relative" onMouseEnter={() => handleMouseEnter('Funding')} onMouseLeave={handleMouseLeave}>
               <button
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 ${openDropdown === 'Funding' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : ''}`}
@@ -423,7 +428,41 @@ export default function Header() {
               )}
             </div>
 
-            {/* Resources */}
+            {/* Free Courses (unchanged – but ensure filters work) */}
+            <div className="relative" onMouseEnter={() => handleMouseEnter('Courses')} onMouseLeave={handleMouseLeave}>
+              <button
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 ${openDropdown === 'Courses' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : ''}`}
+                style={{ color: openDropdown === 'Courses' ? 'white' : settings.headerTextColor || '#1A1A1A' }}
+              >
+                <BookOpen className="w-4 h-4" /> Courses
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openDropdown === 'Courses' ? 'rotate-180' : ''}`} />
+              </button>
+              {openDropdown === 'Courses' && (
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                  <div className="p-4">
+                    <h3 className="font-semibold text-[#0B3B2F] text-sm mb-3 px-2">Popular Platforms</h3>
+                    <div className="space-y-1">
+                      {freeCoursePlatforms.map((platform) => (
+                        <Link
+                          key={platform.name}
+                          href={`/courses?platforms=${encodeURIComponent(platform.name)}`}
+                          onClick={() => setOpenDropdown(null)}
+                          className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#0B3B2F] hover:bg-gray-50 transition-colors py-2 px-3 rounded-lg"
+                        >
+                          <platform.icon className="w-4 h-4 text-gray-500" />
+                          <span>{platform.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                    <Link href="/courses" onClick={() => setOpenDropdown(null)} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium mt-4 pt-3 border-t border-gray-100 hover:text-[#0B3B2F] transition-colors">
+                      Browse all courses →
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Resources (unchanged) */}
             <div className="relative" onMouseEnter={() => handleMouseEnter('Resources')} onMouseLeave={handleMouseLeave}>
               <button
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-gray-50 ${openDropdown === 'Resources' ? 'bg-[#0B3B2F] text-white hover:bg-[#1A5D4A] hover:text-white' : ''}`}
@@ -479,6 +518,10 @@ export default function Header() {
                             <Compass className="w-4 h-4 text-gray-500" />
                             <span>All Resources</span>
                           </Link>
+                          <Link href="/courses" onClick={() => setOpenDropdown(null)} className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#0B3B2F] rounded-lg">
+                            <GraduationCap className="w-4 h-4 text-gray-500" />
+                            <span>Free Courses</span>
+                          </Link>
                         </div>
                       </div>
                       <div>
@@ -503,7 +546,7 @@ export default function Header() {
               )}
             </div>
 
-            {/* Follow Us */}
+            {/* Follow Us (unchanged) */}
             {socialLinks.length > 0 && (
               <div className="relative" onMouseEnter={() => handleMouseEnter('FollowUs')} onMouseLeave={handleMouseLeave}>
                 <button
@@ -542,183 +585,208 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu – also updated to merge the third column into the second */}
         {mobileMenuOpen && (
-  <div className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto pb-20" style={{ backgroundColor: settings.headerBgColor || '#FFFFFF' }}>
-    <div className="px-4 py-4 space-y-2">
-      {/* Programmes Accordion */}
-      <div className="border-b border-gray-100">
-        <button onClick={() => toggleMobileSection('programmes')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
-          <span className="flex items-center gap-3 font-medium"><GraduationCap className="w-5 h-5" /> Programmes</span>
-          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('programmes') ? 'rotate-180' : ''}`} />
-        </button>
-        {mobileExpandedSections.has('programmes') && (
-          <div className="pb-4 space-y-4">
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Popular Filters</h4>
-              <div className="space-y-1">
-                {programmesFilters.map(filter => (
-                  <Link key={filter.name} href={createFilterUrl(filter.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                    <filter.icon className="w-4 h-4 text-gray-400" />{filter.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Fields of Study</h4>
-              <div className="space-y-1">
-                {programmesDisciplines.slice(0, 6).map(d => (
-                  <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                    <d.icon className="w-4 h-4 text-gray-400" />{d.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <Link href="/scholarships" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
-              View all programmes <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Universities Accordion */}
-      <div className="border-b border-gray-100">
-        <button onClick={() => toggleMobileSection('universities')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
-          <span className="flex items-center gap-3 font-medium"><Building2 className="w-5 h-5" /> Universities</span>
-          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('universities') ? 'rotate-180' : ''}`} />
-        </button>
-        {mobileExpandedSections.has('universities') && (
-          <div className="pb-4 space-y-4">
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Location</h4>
-              <div className="space-y-1">
-                {universitiesByLocation.map(uni => (
-                  <Link key={uni.name} href={createFilterUrl(uni.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                    <uni.icon className="w-4 h-4 text-gray-400" />{uni.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <Link href="/universities" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
-              Browse all universities <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Destinations Accordion */}
-      <div className="border-b border-gray-100">
-        <button onClick={() => toggleMobileSection('destinations')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
-          <span className="flex items-center gap-3 font-medium"><Globe2 className="w-5 h-5" /> Destinations</span>
-          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('destinations') ? 'rotate-180' : ''}`} />
-        </button>
-        {mobileExpandedSections.has('destinations') && (
-          <div className="pb-4 space-y-4">
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Top Destinations</h4>
-              <div className="space-y-1">
-                {destinationsPopular.map(c => (
-                  <Link key={c.name} href={createFilterUrl(c.filter)} onClick={closeMobileMenu} className="block py-2 text-sm text-gray-600">{c.name}</Link>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Region</h4>
-              <div className="space-y-1">
-                {destinationsRegions.map(r => (
-                  <Link key={r.name} href={createFilterUrl(r.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                    <r.icon className="w-4 h-4 text-gray-400" />{r.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <Link href="/countries" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
-              Browse all countries <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Funding Accordion */}
-      <div className="border-b border-gray-100">
-        <button onClick={() => toggleMobileSection('funding')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
-          <span className="flex items-center gap-3 font-medium"><Award className="w-5 h-5" /> Funding</span>
-          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('funding') ? 'rotate-180' : ''}`} />
-        </button>
-        {mobileExpandedSections.has('funding') && (
-          <div className="pb-4 space-y-4">
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Funding Types</h4>
-              <div className="space-y-1">
-                {fundingTypes.map(t => (
-                  <Link key={t.name} href={createFilterUrl(t.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                    <t.icon className="w-4 h-4 text-gray-400" />{t.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Deadline</h4>
-              <div className="space-y-1">
-                {fundingDeadlines.map(d => (
-                  <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="block py-2 text-sm text-gray-600">{d.name}</Link>
-                ))}
-              </div>
-            </div>
-            <Link href="/calendar" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
-              View calendar <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Resources Accordion */}
-      <div className="border-b border-gray-100">
-        <button onClick={() => toggleMobileSection('resources')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
-          <span className="flex items-center gap-3 font-medium"><BookOpen className="w-5 h-5" /> Resources</span>
-          <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('resources') ? 'rotate-180' : ''}`} />
-        </button>
-        {mobileExpandedSections.has('resources') && (
-          <div className="pb-4 space-y-4">
-            {resourceSections.map(section => (
-              <div key={section.title}>
-                <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">{section.title}</h4>
-                <div className="space-y-1">
-                  {section.links.map(link => (
-                    <Link key={link.name} href={link.href} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
-                      <link.icon className="w-4 h-4 text-gray-400" />{link.name}
+          <div className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto pb-20" style={{ backgroundColor: settings.headerBgColor || '#FFFFFF' }}>
+            <div className="px-4 py-4 space-y-2">
+              {/* Programmes Accordion (updated) */}
+              <div className="border-b border-gray-100">
+                <button onClick={() => toggleMobileSection('programmes')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+                  <span className="flex items-center gap-3 font-medium"><GraduationCap className="w-5 h-5" /> Programmes</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('programmes') ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileExpandedSections.has('programmes') && (
+                  <div className="pb-4 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Popular Filters</h4>
+                      <div className="space-y-1">
+                        {programmesFilters.map(filter => (
+                          <Link key={filter.name} href={createFilterUrl(filter.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                            <filter.icon className="w-4 h-4 text-gray-400" />{filter.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Fields of Study</h4>
+                      <div className="space-y-1">
+                        {programmesDisciplines.map(d => (
+                          <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                            <d.icon className="w-4 h-4 text-gray-400" />{d.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/scholarships" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+                      View all programmes <ChevronRight className="w-4 h-4" />
                     </Link>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
-            ))}
+
+              {/* Universities Accordion (unchanged) */}
+              <div className="border-b border-gray-100">
+                <button onClick={() => toggleMobileSection('universities')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+                  <span className="flex items-center gap-3 font-medium"><Building2 className="w-5 h-5" /> Universities</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('universities') ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileExpandedSections.has('universities') && (
+                  <div className="pb-4 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Location</h4>
+                      <div className="space-y-1">
+                        {universitiesByLocation.map(uni => (
+                          <Link key={uni.name} href={createFilterUrl(uni.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                            <uni.icon className="w-4 h-4 text-gray-400" />{uni.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/universities" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+                      Browse all universities <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Destinations Accordion (unchanged) */}
+              <div className="border-b border-gray-100">
+                <button onClick={() => toggleMobileSection('destinations')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+                  <span className="flex items-center gap-3 font-medium"><Globe2 className="w-5 h-5" /> Destinations</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('destinations') ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileExpandedSections.has('destinations') && (
+                  <div className="pb-4 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Top Destinations</h4>
+                      <div className="space-y-1">
+                        {destinationsPopular.map(c => (
+                          <Link key={c.name} href={createFilterUrl(c.filter)} onClick={closeMobileMenu} className="block py-2 text-sm text-gray-600">{c.name}</Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Region</h4>
+                      <div className="space-y-1">
+                        {destinationsRegions.map(r => (
+                          <Link key={r.name} href={createFilterUrl(r.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                            <r.icon className="w-4 h-4 text-gray-400" />{r.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/countries" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+                      Browse all countries <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Funding Accordion (unchanged) */}
+              <div className="border-b border-gray-100">
+                <button onClick={() => toggleMobileSection('funding')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+                  <span className="flex items-center gap-3 font-medium"><Award className="w-5 h-5" /> Funding</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('funding') ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileExpandedSections.has('funding') && (
+                  <div className="pb-4 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Funding Types</h4>
+                      <div className="space-y-1">
+                        {fundingTypes.map(t => (
+                          <Link key={t.name} href={createFilterUrl(t.filter)} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                            <t.icon className="w-4 h-4 text-gray-400" />{t.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">By Deadline</h4>
+                      <div className="space-y-1">
+                        {fundingDeadlines.map(d => (
+                          <Link key={d.name} href={createFilterUrl(d.filter)} onClick={closeMobileMenu} className="block py-2 text-sm text-gray-600">{d.name}</Link>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/calendar" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+                      View calendar <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Free Courses Accordion (unchanged) */}
+              <div className="border-b border-gray-100">
+                <button onClick={() => toggleMobileSection('courses')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+                  <span className="flex items-center gap-3 font-medium"><BookOpen className="w-5 h-5" /> Free Courses</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('courses') ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileExpandedSections.has('courses') && (
+                  <div className="pb-4 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Popular Platforms</h4>
+                      <div className="space-y-1">
+                        {freeCoursePlatforms.map(platform => (
+                          <Link key={platform.name} href={`/courses?platforms=${encodeURIComponent(platform.name)}`} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                            <platform.icon className="w-4 h-4 text-gray-400" />{platform.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/courses" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-[#D4A373] font-medium pt-2 border-t border-gray-100">
+                      Browse all courses <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Resources Accordion (unchanged) */}
+              <div className="border-b border-gray-100">
+                <button onClick={() => toggleMobileSection('resources')} className="w-full flex items-center justify-between py-4 text-left" style={{ color: settings.headerTextColor || '#1A1A1A' }}>
+                  <span className="flex items-center gap-3 font-medium"><BookOpen className="w-5 h-5" /> Resources</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${mobileExpandedSections.has('resources') ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileExpandedSections.has('resources') && (
+                  <div className="pb-4 space-y-4">
+                    {resourceSections.map(section => (
+                      <div key={section.title}>
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">{section.title}</h4>
+                        <div className="space-y-1">
+                          {section.links.map(link => (
+                            <Link key={link.name} href={link.href} onClick={closeMobileMenu} className="flex items-center gap-3 py-2 text-sm text-gray-600">
+                              <link.icon className="w-4 h-4 text-gray-400" />{link.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Social Links (unchanged) */}
+              {socialLinks.length > 0 && (
+                <div className="py-4 border-b border-gray-100">
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase mb-3">Follow Us</h4>
+                  <div className="flex gap-4">
+                    {socialLinks.map(link => (
+                      <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-100 rounded-full text-gray-600 hover:bg-[#0B3B2F] hover:text-white transition-colors">
+                        <link.icon className="w-5 h-5" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile CTA */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+              <Link href="/scholarships" onClick={closeMobileMenu} className="block w-full bg-gradient-to-r from-[#0B3B2F] to-[#1A5D4A] text-white px-6 py-3 rounded-xl text-center font-medium hover:shadow-lg transition-all">
+                Find Scholarships
+              </Link>
+            </div>
           </div>
         )}
-      </div>
-
-      {/* Social Links */}
-      {socialLinks.length > 0 && (
-        <div className="py-4 border-b border-gray-100">
-          <h4 className="text-xs font-semibold text-gray-400 uppercase mb-3">Follow Us</h4>
-          <div className="flex gap-4">
-            {socialLinks.map(link => (
-              <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-100 rounded-full text-gray-600 hover:bg-[#0B3B2F] hover:text-white transition-colors">
-                <link.icon className="w-5 h-5" />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-
-    {/* Mobile CTA */}
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
-      <Link href="/scholarships" onClick={closeMobileMenu} className="block w-full bg-gradient-to-r from-[#0B3B2F] to-[#1A5D4A] text-white px-6 py-3 rounded-xl text-center font-medium hover:shadow-lg transition-all">
-        Find Scholarships
-      </Link>
-    </div>
-  </div>
-)}
       </div>
     </header>
   );

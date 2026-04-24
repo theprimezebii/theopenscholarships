@@ -6,9 +6,9 @@ import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { 
-  Plus, Edit, Trash2, Search, ChevronUp, ChevronDown, 
-  Filter, CheckSquare, Square 
+import {
+  Plus, Edit, Trash2, Search, ChevronUp, ChevronDown,
+  Filter, CheckSquare, Square
 } from 'lucide-react';
 
 interface Scholarship {
@@ -29,25 +29,42 @@ const PAGE_SIZE_OPTIONS = [25, 50, 75, 100];
 function ScholarshipsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  
+
   const currentPage = parseInt(searchParams.get('page') || '1');
   const pageSize = parseInt(searchParams.get('limit') || '25');
   const searchQuery = searchParams.get('search') || '';
   const statusFilter = searchParams.get('status') || 'all';
+  const countryFilter = searchParams.get('country') || '';   // ← moved up here
   const sortField = (searchParams.get('sortField') as SortField) || 'deadline';
   const sortOrder = (searchParams.get('sortOrder') as SortOrder) || 'asc';
-  
+
   const [searchInput, setSearchInput] = useState(searchQuery);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const isUpdatingFromUrl = useRef(false);
+  const [countries, setCountries] = useState<string[]>([]);   // ← countries state
 
   const totalPages = Math.ceil(total / pageSize);
 
+  // Fetch country list once
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch('/api/filters');
+        const data = await res.json();
+        setCountries(data.countries || []);
+      } catch (error) {
+        console.error('Failed to fetch countries:', error);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Now countryFilter is defined before fetchScholarships
   const fetchScholarships = useCallback(async () => {
     setLoading(true);
     try {
@@ -56,9 +73,10 @@ function ScholarshipsPageContent() {
       params.set('limit', pageSize.toString());
       if (searchQuery) params.set('search', searchQuery);
       if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (countryFilter) params.set('country', countryFilter);    // ← now works
       params.set('sortField', sortField);
       params.set('sortOrder', sortOrder);
-      
+
       const res = await fetch(`/api/scholarships?${params.toString()}`);
       const data = await res.json();
       setScholarships(data.scholarships || []);
@@ -69,7 +87,7 @@ function ScholarshipsPageContent() {
       setLoading(false);
       setSelectedIds(new Set());
     }
-  }, [currentPage, pageSize, searchQuery, statusFilter, sortField, sortOrder]);
+  }, [currentPage, pageSize, searchQuery, statusFilter, countryFilter, sortField, sortOrder]);
 
   useEffect(() => {
     fetchScholarships();
@@ -84,6 +102,7 @@ function ScholarshipsPageContent() {
     router.replace(`/admin/scholarships?${params.toString()}`, { scroll: false });
   }, [router, searchParams]);
 
+  // Sync URL on filter/page changes
   useEffect(() => {
     if (isUpdatingFromUrl.current) {
       isUpdatingFromUrl.current = false;
@@ -94,10 +113,11 @@ function ScholarshipsPageContent() {
     if (pageSize !== 25) updates.limit = pageSize.toString();
     if (searchQuery) updates.search = searchQuery;
     if (statusFilter !== 'all') updates.status = statusFilter;
+    if (countryFilter) updates.country = countryFilter;      // ← sync country
     if (sortField !== 'deadline') updates.sortField = sortField;
     if (sortOrder !== 'asc') updates.sortOrder = sortOrder;
     updateUrl(updates);
-  }, [currentPage, pageSize, searchQuery, statusFilter, sortField, sortOrder, updateUrl]);
+  }, [currentPage, pageSize, searchQuery, statusFilter, countryFilter, sortField, sortOrder, updateUrl]);
 
   useEffect(() => {
     isUpdatingFromUrl.current = true;
@@ -110,6 +130,10 @@ function ScholarshipsPageContent() {
 
   const handleStatusFilter = (status: string) => {
     updateUrl({ status: status === 'all' ? null : status, page: '1' });
+  };
+
+  const handleCountryFilter = (value: string) => {
+    updateUrl({ country: value || null, page: '1' });
   };
 
   const handleSort = (field: SortField) => {
@@ -177,7 +201,7 @@ function ScholarshipsPageContent() {
   };
 
   const SortHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
-    <th 
+    <th
       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
       onClick={() => handleSort(field)}
     >
@@ -206,7 +230,7 @@ function ScholarshipsPageContent() {
               className="pl-9 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4A373] w-full sm:w-64"
             />
           </form>
-          
+
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-gray-400" />
             <select
@@ -220,9 +244,18 @@ function ScholarshipsPageContent() {
               <option value="closed">Closed</option>
               <option value="coming-soon">Coming Soon</option>
             </select>
+            {/* Country filter */}
+            <select
+              value={countryFilter}
+              onChange={(e) => handleCountryFilter(e.target.value)}
+              className="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#D4A373] text-sm"
+            >
+              <option value="">All Countries</option>
+              {countries.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
         </div>
-        
+
         <div className="flex gap-3 w-full sm:w-auto">
           {selectedIds.size > 0 && (
             <button

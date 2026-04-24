@@ -1,0 +1,751 @@
+// scripts/seed-add-courses.js
+const fs = require('fs');
+const path = require('path');
+const mongoose = require('mongoose');
+
+// Load .env.local
+const envPath = path.join(__dirname, '..', '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      const value = valueParts.join('=').replace(/^["']|["']$/g, '');
+      if (key && value) process.env[key] = value;
+    }
+  });
+}
+
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI not found in .env.local');
+  process.exit(1);
+}
+
+// Slugify function (same as yours)
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60);
+}
+
+// Define the Course schema (adjust to match your actual model)
+const courseSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  slug: { type: String, required: true, unique: true },
+  provider: String,
+  platform: String,
+  category: String,
+  level: String,
+  duration: String,
+  language: String,
+  certificateOffered: Boolean,
+  officialLink: String,
+  image: String,
+  tags: [String],
+  featured: Boolean,
+  description: String,
+  instructor: String,
+  requirements: [String],
+  syllabus: [String],
+  platformDetails: String,
+  enrolledCount: String,
+  rating: Number,
+  faqs: [{ question: String, answer: String }]
+}, { timestamps: true });
+
+const Course = mongoose.model('Course', courseSchema);
+
+// ------------------------------------------------------------
+// 👇 PASTE YOUR additionalCourses ARRAY HERE
+// ------------------------------------------------------------
+const additionalCourses = [
+  {
+    title: "Introduction to Cloud Computing (IBM)",
+    provider: "IBM",
+    platform: "Coursera",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "5 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/introduction-to-cloud",
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format",
+    tags: ["Cloud Computing", "IBM", "AWS", "Azure", "DevOps"],
+    featured: false,
+    description: "Learn the essentials of cloud computing with IBM experts. Understand IaaS, PaaS, SaaS, and major cloud providers like AWS, Azure, and IBM Cloud. This course covers virtualization, storage, networking, and security in the cloud. Perfect for IT professionals looking to expand their skills into the cloud domain.",
+    instructor: "Rav Ahuja, IBM Global Program Director, Cloud and AI Learning",
+    requirements: ["Basic IT knowledge", "No prior cloud experience required"],
+    syllabus: [
+      "Overview of cloud computing models",
+      "Infrastructure as a Service (IaaS)",
+      "Platform as a Service (PaaS)",
+      "Software as a Service (SaaS)",
+      "Public, private, and hybrid clouds",
+      "Virtualization and containers",
+      "Cloud storage and networking",
+      "Security and compliance in the cloud",
+      "Cloud migration strategies",
+      "Career paths in cloud computing"
+    ],
+    platformDetails: "Part of the IBM Cloud Professional Certificate. Financial aid available.",
+    enrolledCount: "210K+ enrolled",
+    rating: 4.5,
+    faqs: [
+      { question: "Do I need to know programming?", answer: "No programming is required for this introductory course." },
+      { question: "Will this prepare me for AWS certification?", answer: "It gives foundational knowledge, but you'll need additional study for specific vendor certifications." }
+    ]
+  },
+  {
+    title: "Project Management Principles (Google)",
+    provider: "Google",
+    platform: "Coursera",
+    category: "Business",
+    level: "Beginner",
+    duration: "6 months (self-paced)",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/professional-certificates/google-project-management",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&auto=format",
+    tags: ["Project Management", "Google", "Agile", "Scrum", "Career Certificate"],
+    featured: true,
+    description: "Start your career in project management with Google’s professional certificate. Learn Agile, Scrum, and traditional project management skills. No degree or experience required. Over 75% of graduates report a positive career outcome within 6 months of completion.",
+    instructor: "Google Project Management team",
+    requirements: ["No prior experience necessary", "Access to a computer"],
+    syllabus: [
+      "Foundations of project management",
+      "Project initiation: goals, stakeholders, scope",
+      "Project planning: schedules, budgets, risk management",
+      "Project execution: managing teams, quality assurance",
+      "Agile project management and Scrum methodology",
+      "Project monitoring and controlling",
+      "Project closing and evaluation",
+      "Capstone: manage a full project lifecycle"
+    ],
+    platformDetails: "Google Career Certificates are designed to prepare you for an entry-level job in high-growth fields.",
+    enrolledCount: "1.4M+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Is this certificate recognized by employers?", answer: "Yes, Google Career Certificates are recognized by many companies, including Google itself." },
+      { question: "Can I finish faster than 6 months?", answer: "Yes, the program is self‑paced; many learners finish in 3–4 months." }
+    ]
+  },
+  {
+    title: "Fundamentals of Digital Image and Video Processing (Northwestern University)",
+    provider: "Northwestern University",
+    platform: "Coursera",
+    category: "Engineering",
+    level: "Intermediate",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/digital",
+    image: "https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?q=80&w=1200&auto=format",
+    tags: ["Image Processing", "Video Processing", "Matlab", "Computer Vision", "Signals"],
+    featured: false,
+    description: "Learn the fundamentals of digital image and video processing, including point operations, frequency domain filtering, and video compression standards. This course is essential for anyone interested in computer vision, multimedia engineering, or signal processing.",
+    instructor: "Aggelos K. Katsaggelos, Professor of Electrical and Computer Engineering",
+    requirements: ["Basic knowledge of signals and systems", "Familiarity with MATLAB or Python helpful"],
+    syllabus: [
+      "Introduction to digital images and sampling",
+      "Point operations and histogram processing",
+      "Spatial filtering and convolution",
+      "Frequency domain: Fourier transform and filtering",
+      "Image restoration and enhancement",
+      "Color image processing",
+      "Video fundamentals and motion estimation",
+      "Video compression standards: MPEG, H.264"
+    ],
+    platformDetails: "Offered by Northwestern University, a top-ranked research institution. Assignments use MATLAB or Octave.",
+    enrolledCount: "85K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Do I need MATLAB?", answer: "MATLAB or Octave is required for the programming assignments." },
+      { question: "Is this course up‑to‑date?", answer: "Yes, it covers modern compression standards and current techniques." }
+    ]
+  },
+  {
+    title: "Introduction to Food and Health (Stanford University)",
+    provider: "Stanford University",
+    platform: "Coursera",
+    category: "Health & Medicine",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/food-and-health",
+    image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=1200&auto=format",
+    tags: ["Nutrition", "Health", "Diet", "Stanford", "Wellness"],
+    featured: false,
+    description: "Understand the relationship between food, nutrition, and health. Learn evidence-based dietary strategies for a healthier lifestyle. This course debunks common food myths and empowers you to make informed decisions about what you eat.",
+    instructor: "Dr. Maya Adam, Stanford School of Medicine",
+    requirements: ["No scientific background required", "An interest in nutrition and wellness"],
+    syllabus: [
+      "Macronutrients and micronutrients",
+      "The science of weight management",
+      "Diet and chronic disease: heart disease, diabetes, cancer",
+      "Nutrition labels and marketing claims",
+      "Plant‑based vs. omnivorous diets",
+      "Gut microbiome and health",
+      "Sustainable eating and food systems"
+    ],
+    platformDetails: "From Stanford University, one of the world’s leading medical schools.",
+    enrolledCount: "320K+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Will this course recommend a specific diet?", answer: "No, it presents scientific evidence and lets you decide." },
+      { question: "Can I apply this knowledge to my own life?", answer: "Absolutely, the practical tips will help you make healthier choices." }
+    ]
+  },
+  {
+    title: "Graphic Design Basics (Canva Design School)",
+    provider: "Canva",
+    platform: "Canva Design School",
+    category: "Arts & Design",
+    level: "Beginner",
+    duration: "2 hours",
+    language: "English",
+    certificateOffered: false,
+    officialLink: "https://www.canva.com/designschool/courses/graphic-design-basics/",
+    image: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=1200&auto=format",
+    tags: ["Graphic Design", "Canva", "Design", "Creativity", "Visual Communication"],
+    featured: false,
+    description: "Learn the core principles of graphic design—color theory, typography, and layout—using Canva’s free tools. Perfect for beginners who want to create stunning social media graphics, presentations, and marketing materials without any prior design experience.",
+    instructor: "Canva Design School team",
+    requirements: ["No design experience needed", "A free Canva account"],
+    syllabus: [
+      "Color theory and palette selection",
+      "Typography: fonts, hierarchy, and pairing",
+      "Layout and composition basics",
+      "Working with images and shapes",
+      "Creating brand kits and templates",
+      "Designing for social media and web",
+      "Print design essentials"
+    ],
+    platformDetails: "Canva Design School offers free, bite‑sized tutorials directly inside Canva.",
+    enrolledCount: "1.8M+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need the paid version of Canva?", answer: "No, all lessons can be completed with the free version." },
+      { question: "How quickly can I learn design?", answer: "You'll be able to create professional graphics after just a few hours." }
+    ]
+  },
+  {
+    title: "Introduction to Astronomy (University of Arizona)",
+    provider: "University of Arizona",
+    platform: "Coursera",
+    category: "Natural Sciences",
+    level: "Beginner",
+    duration: "8 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/astronomy",
+    image: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=1200&auto=format",
+    tags: ["Astronomy", "Space", "Cosmos", "Planets", "Stars"],
+    featured: false,
+    description: "Journey through the universe and learn about planets, stars, galaxies, and the mysteries of the cosmos. This course covers the solar system, stellar evolution, black holes, and the Big Bang, all explained in an accessible, non‑mathematical style.",
+    instructor: "Dr. Chris Impey, University Distinguished Professor of Astronomy",
+    requirements: ["No science background required", "Curiosity about the universe"],
+    syllabus: [
+      "Our place in the universe",
+      "The solar system: planets, moons, and asteroids",
+      "The Sun and stellar evolution",
+      "Galaxies and dark matter",
+      "Black holes and quasars",
+      "Cosmology: the Big Bang and the early universe",
+      "Exoplanets and the search for life",
+      "The future of space exploration"
+    ],
+    platformDetails: "Features stunning imagery from NASA, ESA, and the world’s largest telescopes.",
+    enrolledCount: "190K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Is this course very mathematical?", answer: "No, the emphasis is on concepts and beautiful imagery, not equations." },
+      { question: "Can I see actual telescope data?", answer: "Yes, the course includes real data from professional observatories." }
+    ]
+  },
+  {
+    title: "Introduction to Environmental Science (Dartmouth College)",
+    provider: "Dartmouth College",
+    platform: "edX",
+    category: "Environmental Studies",
+    level: "Beginner",
+    duration: "8 weeks",
+    language: "English",
+    certificateOffered: false,
+    officialLink: "https://www.edx.org/course/introduction-to-environmental-science",
+    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1200&auto=format",
+    tags: ["Environmental Science", "Climate Change", "Sustainability", "Dartmouth", "Ecology"],
+    featured: false,
+    description: "Understand the key principles of environmental science, including ecosystems, biodiversity, and climate change. This course provides a comprehensive overview of Earth’s natural systems and the human impact on the environment, with practical solutions for a sustainable future.",
+    instructor: "Dr. Andrew J. Friedland, Professor of Environmental Studies at Dartmouth",
+    requirements: ["High school science background helpful", "Interest in environmental issues"],
+    syllabus: [
+      "Introduction to Earth’s environmental systems",
+      "Ecosystem ecology and biodiversity",
+      "Human population dynamics",
+      "Water resources and pollution",
+      "Climate change science and impacts",
+      "Energy resources and renewable alternatives",
+      "Sustainable agriculture and food systems",
+      "Environmental policy and personal action"
+    ],
+    platformDetails: "Dartmouth College, an Ivy League university, offers this course as part of its environmental studies curriculum.",
+    enrolledCount: "95K+ enrolled",
+    rating: 4.5,
+    faqs: [
+      { question: "Is this course political?", answer: "It focuses on scientific evidence, not political debate." },
+      { question: "Will I learn how to live more sustainably?", answer: "Yes, the course includes practical tips for reducing your environmental footprint." }
+    ]
+  },
+  {
+    title: "Successful Negotiation: Essential Strategies (University of Michigan)",
+    provider: "University of Michigan",
+    platform: "Coursera",
+    category: "Business",
+    level: "All Levels",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/negotiation-skills",
+    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format",
+    tags: ["Negotiation", "Business Strategy", "Communication", "University of Michigan", "Deal Making"],
+    featured: false,
+    description: "Already listed as #3 in the previous set. Skipping duplicate."
+  },
+  //  (This one was already included, so skip to the next original course)
+  {
+    title: "Introduction to Human Physiology (Duke University)",
+    provider: "Duke University",
+    platform: "Coursera",
+    category: "Health & Medicine",
+    level: "Intermediate",
+    duration: "6 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/physiology",
+    image: "https://images.unsplash.com/photo-1576671081837-49000212a370?q=80&w=1200&auto=format",
+    tags: ["Physiology", "Human Body", "Medicine", "Duke University", "Biology"],
+    featured: false,
+    description: "Explore how the human body works from cells to organ systems. A thorough introduction to physiology for pre‑med students and anyone fascinated by the science of life. Covers nervous, muscular, cardiovascular, respiratory, and renal systems.",
+    instructor: "Dr. Jennifer Carbrey and Dr. Emma Jakoi, Duke University School of Medicine",
+    requirements: ["Basic biology knowledge helpful", "No prior physiology course required"],
+    syllabus: [
+      "Homeostasis and cell physiology",
+      "The nervous system: neurons, synapses, reflex arcs",
+      "Muscle physiology: skeletal, smooth, and cardiac",
+      "Cardiovascular system: heart, blood vessels, regulation",
+      "Respiratory system: gas exchange and ventilation",
+      "Renal system: filtration, reabsorption, and secretion",
+      "Endocrine system: hormones and feedback loops",
+      "Digestive system: nutrient absorption and metabolism"
+    ],
+    platformDetails: "From Duke University, known for its top‑ranked medical school. Interactive quizzes and virtual lab simulations are included.",
+    enrolledCount: "145K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Is this course suitable for MCAT preparation?", answer: "Yes, it covers core physiology topics tested on the MCAT." },
+      { question: "How much time should I dedicate per week?", answer: "Plan for 4–6 hours per week." }
+    ]
+  },
+  {
+    title: "Introduction to Chemistry (Duke University)",
+    provider: "Duke University",
+    platform: "Coursera",
+    category: "Natural Sciences",
+    level: "Beginner",
+    duration: "6 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/chemistry-1",
+    image: "https://images.unsplash.com/photo-1532635241-17e820accdf5?q=80&w=1200&auto=format",
+    tags: ["Chemistry", "Atoms", "Molecules", "Reactions", "Duke University"],
+    featured: false,
+    description: "Discover the world of atoms, molecules, and chemical reactions. A comprehensive introduction to general chemistry concepts, including stoichiometry, bonding, thermodynamics, and acid‑base chemistry, all taught through engaging video lectures and problem‑solving sessions.",
+    instructor: "Dr. Dorian Canelas, Associate Professor of Chemistry at Duke University",
+    requirements: ["High school algebra", "No prior chemistry course required"],
+    syllabus: [
+      "Atoms, elements, and the periodic table",
+      "Chemical bonding: ionic, covalent, metallic",
+      "Chemical reactions and stoichiometry",
+      "Gases and the gas laws",
+      "Thermochemistry and thermodynamics",
+      "Solutions and concentration units",
+      "Acids, bases, and pH",
+      "Redox reactions and electrochemistry"
+    ],
+    platformDetails: "Uses a mastery‑based approach with extensive practice problems and video solutions.",
+    enrolledCount: "110K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Is this course equivalent to a university chemistry course?", answer: "It covers the same material as a first‑semester general chemistry course." },
+      { question: "Do I need a lab kit?", answer: "No, all experiments are demonstrated in the videos." }
+    ]
+  },
+  {
+    title: "Creative Writing (Wesleyan University)",
+    provider: "Wesleyan University",
+    platform: "Coursera",
+    category: "Arts & Design",
+    level: "Beginner",
+    duration: "5 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/creative-writing",
+    image: "https://images.unsplash.com/photo-1519791883288-dc8bd696e667?q=80&w=1200&auto=format",
+    tags: ["Creative Writing", "Storytelling", "Fiction", "Nonfiction", "Wesleyan"],
+    featured: false,
+    description: "Unlock your creativity and learn the craft of writing compelling stories, essays, and poems. This course covers plot structure, character development, dialogue, and revision techniques. Perfect for aspiring writers of all levels.",
+    instructor: "Amy Bloom, Distinguished Writer in Residence at Wesleyan University",
+    requirements: ["No prior writing experience needed", "A love for storytelling"],
+    syllabus: [
+      "The elements of a story: plot, character, setting",
+      "Show versus tell: using sensory details",
+      "Dialogue and voice",
+      "Point of view and narrative perspective",
+      "Writing the personal essay",
+      "Poetry for beginners: imagery and rhythm",
+      "Revision strategies and workshop etiquette",
+      "Publishing and submitting your work"
+    ],
+    platformDetails: "Wesleyan University is known for its strong creative writing program.",
+    enrolledCount: "240K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Will I get feedback on my writing?", answer: "Yes, peer reviews are a core part of the course." },
+      { question: "What genres are covered?", answer: "Fiction, nonfiction, and poetry are all included." }
+    ]
+  },
+  {
+    title: "Introduction to Social Media Marketing (Facebook)",
+    provider: "Facebook",
+    platform: "Coursera",
+    category: "Business",
+    level: "Beginner",
+    duration: "5 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/facebook-social-media-marketing",
+    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1200&auto=format",
+    tags: ["Social Media Marketing", "Facebook", "Instagram", "Content Creation", "Advertising"],
+    featured: false,
+    description: "Master social media marketing with Facebook’s official course. Learn to create engaging content, run paid ads, and measure performance across Facebook and Instagram. Build a portfolio of real‑world marketing materials to showcase your skills.",
+    instructor: "Facebook Marketing Team",
+    requirements: ["No marketing experience needed", "A Facebook/Instagram account for practice"],
+    syllabus: [
+      "Introduction to social media marketing landscape",
+      "Creating a brand voice and content strategy",
+      "Designing visual content for Facebook and Instagram",
+      "Facebook Ads Manager and targeting",
+      "Instagram Shopping and influencer marketing",
+      "Analytics and reporting: Facebook Insights",
+      "Community management and customer engagement",
+      "Final project: create a social media campaign"
+    ],
+    platformDetails: "Developed by Facebook, this course teaches best practices directly from the platform.",
+    enrolledCount: "380K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Do I need a business page to practice?", answer: "You can create a free business page for practice purposes." },
+      { question: "Is this course updated for iOS 14 changes?", answer: "Yes, the content reflects the latest platform updates." }
+    ]
+  },
+  {
+    title: "Introduction to Linux (Linux Foundation)",
+    provider: "Linux Foundation",
+    platform: "edX",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "8 weeks",
+    language: "English",
+    certificateOffered: false,
+    officialLink: "https://www.edx.org/course/introduction-to-linux",
+    image: "https://images.unsplash.com/photo-1629654297299-c8506221ad69?q=80&w=1200&auto=format",
+    tags: ["Linux", "Command Line", "Open Source", "System Administration", "IT"],
+    featured: false,
+    description: "Learn the fundamentals of the Linux operating system and command line. Essential for developers, sysadmins, and DevOps professionals. This course is used by the Linux Foundation to train professionals worldwide and includes hands‑on lab exercises.",
+    instructor: "Jerry Cooperstein, Linux Foundation Training Program Director",
+    requirements: ["No prior Linux experience needed", "Access to a computer for lab exercises"],
+    syllabus: [
+      "Introduction to Linux distributions and installation",
+      "The Linux filesystem hierarchy",
+      "Basic commands and shell navigation",
+      "File permissions and ownership",
+      "Text editors: vi, nano, and graphical editors",
+      "Process management and job control",
+      "Package management: apt, yum, dnf",
+      "Networking basics and remote access with SSH"
+    ],
+    platformDetails: "From the Linux Foundation, the nonprofit organization that supports the Linux kernel and open‑source community.",
+    enrolledCount: "960K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Do I need to install Linux on my computer?", answer: "You can use a virtual machine or the provided online lab environment." },
+      { question: "Will this course prepare me for the LPIC certification?", answer: "It covers many LPIC‑1 topics but is not a complete exam prep." }
+    ]
+  },
+  {
+    title: "Global Diplomacy – Diplomacy in the Modern World (University of London)",
+    provider: "University of London",
+    platform: "Coursera",
+    category: "Social Sciences",
+    level: "Beginner",
+    duration: "5 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/global-diplomacy",
+    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1200&auto=format",
+    tags: ["Diplomacy", "International Relations", "United Nations", "Global Politics", "Peace"],
+    featured: false,
+    description: "Understand the role of diplomacy and diplomats in the 21st century. This course from the University of London examines the history, theory, and practice of diplomacy, including the work of the United Nations, embassies, and non‑governmental organizations. Ideal for anyone interested in international affairs.",
+    instructor: "Dr. J. Simon Rofe, Senior Lecturer in Diplomacy and International Studies",
+    requirements: ["No prior knowledge of diplomacy required", "Interest in world affairs"],
+    syllabus: [
+      "What is diplomacy? Historical evolution",
+      "Types of diplomacy: bilateral, multilateral, public",
+      "The Vienna Convention and diplomatic immunity",
+      "The role of the United Nations in modern diplomacy",
+      "Economic diplomacy and trade negotiations",
+      "Cyber diplomacy and new security challenges",
+      "NGOs and track‑two diplomacy",
+      "The future of diplomacy in a multipolar world"
+    ],
+    platformDetails: "Part of the University of London’s Global Diplomacy program. Verified certificate available.",
+    enrolledCount: "155K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Can this help me get a job in diplomacy?", answer: "It provides a strong foundation and is taught by a leading institution in the field." },
+      { question: "Is the course theoretical or practical?", answer: "It combines theory with real‑world case studies and examples." }
+    ]
+  },
+  {
+    title: "Financial Engineering and Risk Management (Columbia University)",
+    provider: "Columbia University",
+    platform: "Coursera",
+    category: "Business",
+    level: "Advanced",
+    duration: "7 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/financial-engineering",
+    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1200&auto=format",
+    tags: ["Financial Engineering", "Risk Management", "Derivatives", "Portfolio Optimization", "Columbia"],
+    featured: false,
+    description: "Learn the quantitative methods used by investment banks and hedge funds. This course covers derivative pricing, portfolio optimization, and risk measurement using Excel and R. Advanced mathematical content is presented in an accessible way with practical applications.",
+    instructor: "Martin Haugh and Garud Iyengar, Professors at Columbia University",
+    requirements: ["Undergraduate-level probability and statistics", "Basic programming familiarity (R or Python helpful)"],
+    syllabus: [
+      "Introduction to derivatives: forwards, futures, options",
+      "Pricing by replication and no‑arbitrage",
+      "Binomial trees and the Black‑Scholes model",
+      "Monte Carlo simulation for pricing",
+      "Value at Risk (VaR) and expected shortfall",
+      "Portfolio optimization: Markowitz and beyond",
+      "Credit risk and default models",
+      "Final project: build a risk management system"
+    ],
+    platformDetails: "From Columbia University, an Ivy League institution with a top‑ranked business school.",
+    enrolledCount: "72K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need advanced math?", answer: "A strong quantitative background is assumed; this is not a beginner course." },
+      { question: "Can I use Python instead of R?", answer: "The course examples use R, but Python equivalents are often provided." }
+    ]
+  },
+  {
+    title: "Photography Basics and Beyond (Michigan State University)",
+    provider: "Michigan State University",
+    platform: "Coursera",
+    category: "Arts & Design",
+    level: "Beginner",
+    duration: "7 months (specialization)",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/specializations/photography-basics",
+    image: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1200&auto=format",
+    tags: ["Photography", "DSLR", "Composition", "Lighting", "Michigan State"],
+    featured: false,
+    description: "Take your photography from snapshot to art with this comprehensive specialization. You'll master camera controls, composition, lighting, and post‑processing using Adobe Lightroom. Build a portfolio that demonstrates your new skills.",
+    instructor: "Peter Glendinning and Mark Sullivan, Professors of Photography at MSU",
+    requirements: ["Access to a camera (smartphone or DSLR)", "No prior photography experience required"],
+    syllabus: [
+      "Camera control: aperture, shutter speed, ISO",
+      "Exposure and metering modes",
+      "Composition: rule of thirds, leading lines, framing",
+      "Lighting: natural and artificial light",
+      "Portrait photography",
+      "Landscape and travel photography",
+      "Post‑processing with Adobe Lightroom",
+      "Building a photography portfolio"
+    ],
+    platformDetails: "Part of the Photography Basics and Beyond specialization. Peer-reviewed assignments and a capstone project are included.",
+    enrolledCount: "440K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need a DSLR?", answer: "Any camera with manual controls works, including many smartphone cameras." },
+      { question: "Is Lightroom included?", answer: "A free trial of Lightroom is available; the course also covers open‑source alternatives." }
+    ]
+  },
+  {
+    title: "Introduction to Corporate Finance (University of Pennsylvania)",
+    provider: "University of Pennsylvania",
+    platform: "Coursera",
+    category: "Business",
+    level: "Intermediate",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/wharton-finance",
+    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1200&auto=format",
+    tags: ["Corporate Finance", "Wharton", "Valuation", "Investment", "Business"],
+    featured: false,
+    description: "Learn the essentials of corporate finance from Wharton professors. You'll understand time value of money, capital budgeting, stock and bond valuation, and risk‑return tradeoffs. Ideal for business students, entrepreneurs, and anyone wanting to make smarter financial decisions.",
+    instructor: "Michael R. Roberts, Professor of Finance at the Wharton School",
+    requirements: ["Basic algebra and spreadsheet skills", "No prior finance knowledge needed"],
+    syllabus: [
+      "Time value of money and discounted cash flows",
+      "Bond valuation and interest rate risk",
+      "Stock valuation: dividend discount model, multiples",
+      "Capital budgeting: NPV, IRR, payback period",
+      "Risk and return: CAPM and WACC",
+      "Capital structure and Modigliani‑Miller",
+      "Dividend policy and share repurchases",
+      "Financial modeling with Excel"
+    ],
+    platformDetails: "Part of Wharton's Business Foundations Specialization, one of the most popular finance courses online.",
+    enrolledCount: "680K+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Do I need Excel?", answer: "Yes, Excel (or Google Sheets) is used for the financial modeling assignments." },
+      { question: "Can I apply this to personal finance?", answer: "The principles are corporate‑focused but the time value of money and valuation concepts apply to personal investing as well." }
+    ]
+  },
+  {
+    title: "Introduction to Machine Learning (Stanford University)",
+    provider: "Stanford University",
+    platform: "Coursera",
+    category: "Computer Science",
+    level: "Intermediate",
+    duration: "11 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/machine-learning",
+    image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=1200&auto=format",
+    tags: ["Machine Learning", "AI", "Stanford", "Coursera", "Data Science"],
+    featured: true,
+    description: "Already listed as #1 in the previous set. Skipping."
+  },
+  // (skipping duplicates)
+  {
+    title: "Digital Transformation (Boston Consulting Group)",
+    provider: "Boston Consulting Group",
+    platform: "Coursera",
+    category: "Business",
+    level: "Intermediate",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/digital-transformation",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format",
+    tags: ["Digital Transformation", "BCG", "Technology", "Strategy", "Innovation"],
+    featured: false,
+    description: "Understand the frameworks and strategies used by Boston Consulting Group to help companies go digital. Learn about disruption, platform business models, and the organizational changes needed for successful digital transformation. Ideal for managers, consultants, and entrepreneurs.",
+    instructor: "Michael Chu, Managing Director & Partner at BCG",
+    requirements: ["General business knowledge helpful", "No technical background required"],
+    syllabus: [
+      "What is digital transformation? Drivers and trends",
+      "Platform business models and network effects",
+      "Disruption and innovation: Christensen’s framework",
+      "Data‑driven decision making",
+      "Agile methodologies and DevOps",
+      "Digital culture and talent management",
+      "Case studies: Netflix, Amazon, and traditional incumbents",
+      "Developing your own digital transformation roadmap"
+    ],
+    platformDetails: "Co‑created with BCG, one of the world’s top three management consulting firms.",
+    enrolledCount: "210K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Can I use this for a consulting interview?", answer: "Absolutely—the frameworks taught are directly applicable to case interviews." },
+      { question: "Is this course theoretical or practical?", answer: "It combines theory with real BCG case studies and a hands‑on project." }
+    ]
+  },
+  {
+    title: "Introduction to Sustainable Development (Columbia University)",
+    provider: "Columbia University",
+    platform: "Coursera",
+    category: "Social Sciences",
+    level: "Beginner",
+    duration: "8 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/sustainable-development",
+    image: "https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?q=80&w=1200&auto=format",
+    tags: ["Sustainable Development", "SDGs", "Climate Action", "Poverty", "Columbia"],
+    featured: false,
+    description: "Explore the United Nations Sustainable Development Goals (SDGs) and the global challenges of poverty, inequality, climate change, and peace. Taught by world‑renowned economist Jeffrey Sachs, this course provides a comprehensive introduction to the policies and technologies needed for a sustainable future.",
+    instructor: "Jeffrey D. Sachs, Director of the Earth Institute at Columbia University",
+    requirements: ["No prerequisites", "Interest in global issues"],
+    syllabus: [
+      "What is sustainable development? History and SDGs",
+      "Economic growth and poverty reduction",
+      "Health, education, and gender equality",
+      "Climate change science and policies",
+      "Biodiversity and ecosystem services",
+      "Sustainable cities and infrastructure",
+      "Financing for development",
+      "The role of technology and innovation"
+    ],
+    platformDetails: "Columbia University and the UN Sustainable Development Solutions Network.",
+    enrolledCount: "250K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Is this course only about environmental issues?", answer: "No, it covers the full range of sustainable development: economic, social, and environmental." },
+      { question: "Can I earn a certificate?", answer: "Yes, a verified certificate is available upon completion." }
+    ]
+  }
+];
+// ------------------------------------------------------------
+
+// Remove the malformed "Successful Negotiation..." entry if present (the one with the placeholder description)
+const cleanedCourses = newCourses.filter(course => {
+  const isMalformed = course.description && course.description.includes("Already listed as #3");
+  if (isMalformed) console.warn(`⚠️ Skipping malformed course: ${course.title}`);
+  return !isMalformed;
+});
+
+async function seed() {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('✅ Connected to MongoDB');
+
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    for (const courseData of cleanedCourses) {
+      // Generate slug from title
+      const slug = slugify(courseData.title);
+
+      // Check if a course with this slug already exists
+      const existing = await Course.findOne({ slug });
+      if (existing) {
+        console.log(`⏭️ Skipping existing course: ${courseData.title} (slug: ${slug})`);
+        skippedCount++;
+        continue;
+      }
+
+      // Add slug to the document
+      const courseToInsert = { ...courseData, slug };
+      await Course.create(courseToInsert);
+      console.log(`✅ Added new course: ${courseData.title}`);
+      addedCount++;
+    }
+
+    console.log(`\n🎉 Done! Added ${addedCount} new courses, skipped ${skippedCount} existing ones.`);
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error seeding courses:', error);
+    process.exit(1);
+  }
+}
+
+seed();

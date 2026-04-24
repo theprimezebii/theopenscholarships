@@ -1,0 +1,737 @@
+// scripts/seed-2-courses.js
+const fs = require('fs');
+const path = require('path');
+const mongoose = require('mongoose');
+
+const envPath = path.join(__dirname, '..', '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      const value = valueParts.join('=').replace(/^["']|["']$/g, '');
+      if (key && value) process.env[key] = value;
+    }
+  });
+}
+
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI not found in .env.local');
+  process.exit(1);
+}
+
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60);
+}
+
+const courses = [
+  // 1
+  {
+    title: "Data Science: R Basics (Harvard University)",
+    provider: "Harvard University",
+    platform: "edX",
+    category: "Data Science",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.edx.org/course/data-science-r-basics",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format",
+    tags: ["Data Science", "R", "Statistics", "Harvard", "Beginner"],
+    featured: false,
+    description: "Learn the fundamentals of data science using the R programming language. This course covers data wrangling, visualization, and basic statistical inference with real-world datasets. No prior programming experience is required. Perfect for beginners who want to start their data science journey with a strong statistical foundation.",
+    instructor: "Rafael Irizarry, Professor of Biostatistics at Harvard T.H. Chan School of Public Health",
+    requirements: [
+      "No programming experience needed",
+      "Basic high school mathematics (algebra concepts)",
+      "A computer with internet access and R installed (free)"
+    ],
+    syllabus: [
+      "Introduction to R and RStudio",
+      "Data types, vectors, and matrices",
+      "Data frames and importing data",
+      "Data wrangling with dplyr",
+      "Data visualization with ggplot2",
+      "Descriptive statistics",
+      "Introduction to probability distributions",
+      "Confidence intervals and hypothesis testing",
+      "Linear regression basics",
+      "Final data analysis project"
+    ],
+    platformDetails: "edX is a trusted platform for quality education from the world’s best universities. Verified certificates available for a fee, but the course content is free to audit.",
+    enrolledCount: "350K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need to know R before starting?", answer: "No, the course starts from the very basics of R programming." },
+      { question: "Is a verified certificate worth it?", answer: "A verified certificate adds credibility to your LinkedIn profile and CV." },
+      { question: "How many hours per week?", answer: "Plan for 3–5 hours per week." }
+    ]
+  },
+  // 2
+  {
+    title: "Introduction to Genetics and Evolution (Duke University)",
+    provider: "Duke University",
+    platform: "Coursera",
+    category: "Natural Sciences",
+    level: "Intermediate",
+    duration: "6 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/genetics-evolution",
+    image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200&auto=format",
+    tags: ["Genetics", "Evolution", "Biology", "DNA", "Duke University"],
+    featured: false,
+    description: "Explore the fundamental principles of genetics and evolution. Understand DNA, heredity, natural selection, and the origin of species. This course bridges classical genetics with modern genomics and provides a solid grounding for further study in biology, medicine, or anthropology.",
+    instructor: "Dr. Mohamed Noor, Professor of Biology at Duke University",
+    requirements: [
+      "High school biology background recommended",
+      "Interest in how life evolves and adapts"
+    ],
+    syllabus: [
+      "Evidence for evolution and natural selection",
+      "Basic transmission genetics and Punnett squares",
+      "Population genetics and Hardy-Weinberg equilibrium",
+      "Molecular genetics: DNA, RNA, and protein synthesis",
+      "Mutation, genetic variation, and recombination",
+      "Phylogenetics and evolutionary trees",
+      "Genomics and evolutionary developmental biology",
+      "Applications in medicine and conservation"
+    ],
+    platformDetails: "Coursera offers flexible learning with video lectures, quizzes, and peer discussions. Financial aid is available for those who qualify.",
+    enrolledCount: "215K+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Can I get university credit for this course?", answer: "This course does not award university credit directly, but a verified certificate can be used to demonstrate knowledge." },
+      { question: "Is the math difficult?", answer: "Only basic algebra is required; the emphasis is on concepts rather than heavy computation." }
+    ]
+  },
+  // 3
+  {
+    title: "Successful Negotiation: Essential Strategies (University of Michigan)",
+    provider: "University of Michigan",
+    platform: "Coursera",
+    category: "Business",
+    level: "All Levels",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/negotiation-skills",
+    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format",
+    tags: ["Negotiation", "Business Strategy", "Communication", "University of Michigan", "Deal Making"],
+    featured: false,
+    description: "Master the art of negotiation with this comprehensive course from the University of Michigan. Learn key strategies used by top executives: distributive and integrative bargaining, psychological biases, and practical tactics for salary talks, business deals, and everyday conflicts. Practice with real-world scenarios and peer feedback.",
+    instructor: "George Siedel, Professor of Business Law at Ross School of Business",
+    requirements: ["No prior negotiation experience required", "Willingness to practice and learn from case studies"],
+    syllabus: [
+      "Introduction to negotiation: positions and interests",
+      "Distributive negotiation: claiming value",
+      "Integrative negotiation: creating value",
+      "Psychological biases and how to overcome them",
+      "Negotiation planning and preparation",
+      "Cross-cultural negotiations",
+      "Ethics in negotiation",
+      "Final negotiation simulation"
+    ],
+    platformDetails: "Top-rated course with over 500K learners. Includes interactive negotiation exercises.",
+    enrolledCount: "530K+ enrolled",
+    rating: 4.9,
+    faqs: [
+      { question: "Will this help with salary negotiations?", answer: "Absolutely—the principles apply directly to job offers and salary reviews." },
+      { question: "Do I need a partner to practice?", answer: "Peer exercises are optional; you can practice on your own as well." }
+    ]
+  },
+  // 4
+  {
+    title: "Python for Everybody (University of Michigan)",
+    provider: "University of Michigan",
+    platform: "Coursera",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "8 months (multiple courses)",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/specializations/python",
+    image: "https://images.unsplash.com/photo-1526379879527-8559ecfcaec0?q=80&w=1200&auto=format",
+    tags: ["Python", "Programming", "Data Structures", "University of Michigan", "Web Scraping"],
+    featured: true,
+    description: "This specialization builds on the success of the Python for Everybody course and covers programming, data structures, web data access, and databases. You will write programs to solve real-world problems and build a foundation for data science and web development using Python.",
+    instructor: "Dr. Charles Severance, Clinical Professor at University of Michigan School of Information",
+    requirements: ["No programming experience needed", "A computer with internet access"],
+    syllabus: [
+      "Getting Started with Python",
+      "Python Data Structures",
+      "Using Python to Access Web Data",
+      "Using Databases with Python",
+      "Capstone: Retrieving, Processing, and Visualizing Data with Python"
+    ],
+    platformDetails: "Coursera Specialization; take each course individually or the full program.",
+    enrolledCount: "2M+ enrolled",
+    rating: 4.9,
+    faqs: [
+      { question: "Can I take only one course?", answer: "Yes, each course is available separately, but the specialization provides a complete learning path." },
+      { question: "What can I do after completing this specialization?", answer: "You'll be ready for entry-level programming jobs or further study in data science." }
+    ]
+  },
+  // 5
+  {
+    title: "Circuits and Electronics (MIT)",
+    provider: "MIT",
+    platform: "edX",
+    category: "Engineering",
+    level: "Intermediate",
+    duration: "16 weeks",
+    language: "English",
+    certificateOffered: false,
+    officialLink: "https://www.edx.org/course/circuits-and-electronics-1-basic-circuit-analysis",
+    image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=1200&auto=format",
+    tags: ["Electronics", "Circuits", "MIT", "Engineering", "Ohms Law"],
+    featured: false,
+    description: "Learn the fundamentals of electrical engineering with MIT’s legendary circuits course. Cover resistive elements, capacitors, inductors, and operational amplifiers. Analyze circuits using Kirchhoff’s laws, node/mesh analysis, and Thevenin/Norton equivalents. Essential for anyone pursuing EE or embedded systems.",
+    instructor: "Prof. Anant Agarwal, MIT Department of Electrical Engineering and Computer Science",
+    requirements: ["Basic calculus and linear algebra", "No prior electronics knowledge required"],
+    syllabus: [
+      "Kirchhoff’s laws and circuit basics",
+      "Resistive networks and node analysis",
+      "Superposition, Thevenin and Norton equivalents",
+      "Digital abstraction and MOSFET switches",
+      "Capacitors and inductors – transient analysis",
+      "Sinusoidal steady state and phasors",
+      "Frequency response and Bode plots",
+      "Operational amplifiers (op-amps)",
+      "Diodes and their applications",
+      "Introduction to digital logic gates"
+    ],
+    platformDetails: "MIT OpenCourseWare also offers free lecture notes and videos for this course.",
+    enrolledCount: "180K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Do I need a lab kit?", answer: "No, all exercises are simulation-based, though a physical kit can enhance learning." },
+      { question: "Is this course math-heavy?", answer: "It uses calculus and linear algebra regularly; a solid math background helps." }
+    ]
+  },
+  // 6
+  {
+    title: "Introduction to User Experience (UX) Design (Georgia Tech)",
+    provider: "Georgia Institute of Technology",
+    platform: "Coursera",
+    category: "Arts & Design",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/user-experience-design",
+    image: "https://images.unsplash.com/photo-1541462608143-67571c6738dd?q=80&w=1200&auto=format",
+    tags: ["UX Design", "User Experience", "UI", "Prototyping", "Georgia Tech"],
+    featured: false,
+    description: "Discover the principles of user experience design in this hands-on introductory course. Learn to create intuitive digital products through user research, wireframing, prototyping, and usability testing. Whether you’re a designer, developer, or product manager, you’ll gain skills to make your products more user-friendly.",
+    instructor: "Dr. Rosa Arriaga, Senior Research Scientist at Georgia Tech",
+    requirements: ["No design background needed", "Access to a computer with internet"],
+    syllabus: [
+      "What is UX design? History and principles",
+      "User research methods: interviews, surveys, personas",
+      "Information architecture and task flows",
+      "Wireframing and low-fidelity prototyping",
+      "Visual design principles: typography, color, layout",
+      "High-fidelity prototyping with Figma/Adobe XD",
+      "Usability testing and heuristic evaluation",
+      "Designing for mobile and accessibility"
+    ],
+    platformDetails: "Includes access to free design tools (Figma, Sketch) and real-world project examples.",
+    enrolledCount: "290K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need any design software before starting?", answer: "No, the course provides guidance on free tools like Figma." },
+      { question: "Will I build a portfolio piece?", answer: "Yes, the final project can be used in your UX portfolio." }
+    ]
+  },
+  // 7
+  {
+    title: "Mindshift: Break Through Obstacles to Learning (McMaster University)",
+    provider: "McMaster University",
+    platform: "Coursera",
+    category: "Social Sciences",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/mindshift",
+    image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1200&auto=format",
+    tags: ["Learning", "Career Change", "Motivation", "McMaster", "Self-Development"],
+    featured: false,
+    description: "Overcome mental blocks and learn how to learn effectively. Perfect for career changers and lifelong learners. This course reveals powerful techniques to master new subjects, change careers, and build a growth mindset. Based on neuroscience and cognitive psychology, it helps you unlock your full learning potential.",
+    instructor: "Dr. Barbara Oakley and Dr. Terrence Sejnowski",
+    requirements: ["Open mind and willingness to change learning habits"],
+    syllabus: [
+      "The science of learning and memory",
+      "Overcoming procrastination and building good habits",
+      "Chunking and retrieval practice",
+      "How to change careers: transferable skills",
+      "Building a growth mindset",
+      "Learning from experts and mentors",
+      "Developing a personal learning strategy"
+    ],
+    platformDetails: "Created by the team behind the world-famous 'Learning How to Learn' course.",
+    enrolledCount: "420K+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Is this just for students?", answer: "No, it's suitable for professionals, career changers, and anyone who wants to learn better." },
+      { question: "How is it different from 'Learning How to Learn'?", answer: "It focuses more on career change and real-world applications of learning techniques." }
+    ]
+  },
+  // 8
+  {
+    title: "Spanish for Beginners (Universidad Nacional Autónoma de México)",
+    provider: "UNAM",
+    platform: "Coursera",
+    category: "Humanities",
+    level: "Beginner",
+    duration: "5 weeks",
+    language: "Spanish",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/spanish",
+    image: "https://images.unsplash.com/photo-1559563458-ba05522f0b9e?q=80&w=1200&auto=format",
+    tags: ["Spanish", "Language Learning", "UNAM", "Beginner Spanish", "Vocabulary"],
+    featured: false,
+    description: "Start speaking Spanish from day one with this immersive beginner course from UNAM. Learn basic vocabulary, grammar structures, and everyday phrases for travel, work, and social conversations. The course emphasizes communication and cultural awareness, making it ideal for travelers and language enthusiasts.",
+    instructor: "Prof. Martha Heredia Rubio, UNAM faculty",
+    requirements: ["No prior Spanish knowledge required"],
+    syllabus: [
+      "Greetings, introductions, and basic expressions",
+      "Present tense of regular and irregular verbs",
+      "Talking about hobbies, likes, and dislikes",
+      "Describing people, places, and everyday situations",
+      "Ordering food, shopping, and asking for directions",
+      "Past tenses: pretérito perfecto and indefinido",
+      "Future plans and commands",
+      "Cultural notes: Mexico and Latin America"
+    ],
+    platformDetails: "UNAM is the largest university in Latin America and a leading voice in Spanish language instruction.",
+    enrolledCount: "180K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Do I need a textbook?", answer: "All materials are provided online; no extra purchase needed." },
+      { question: "How fluent will I be after completing this course?", answer: "You will be able to hold basic conversations and handle common travel situations." }
+    ]
+  },
+  // 9
+  {
+    title: "Introduction to Cyber Security (CISCO Networking Academy)",
+    provider: "CISCO",
+    platform: "CISCO Networking Academy",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "15 hours",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.netacad.com/courses/cybersecurity/introduction-cybersecurity",
+    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format",
+    tags: ["Cyber Security", "CISCO", "Network Security", "Ethical Hacking", "Certification"],
+    featured: false,
+    description: "Discover the world of cyber security with CISCO’s free introductory course. Learn about common types of attacks, defense strategies, and career opportunities in this fast-growing field. Upon completion, earn a digital badge that you can share on LinkedIn to showcase your new skills.",
+    instructor: "CISCO Networking Academy instructors",
+    requirements: ["No prior IT knowledge required", "Interest in technology and security"],
+    syllabus: [
+      "The cybersecurity landscape and threats",
+      "Malware, phishing, and social engineering",
+      "Network security basics: firewalls, VPNs, IDS/IPS",
+      "Cryptography fundamentals",
+      "Identity and access management",
+      "Incident response and business continuity",
+      "Legal and ethical issues in cybersecurity",
+      "Career paths and certifications"
+    ],
+    platformDetails: "CISCO Networking Academy is a globally recognized IT education program with free courses for beginners.",
+    enrolledCount: "1.2M+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I get a certificate after completion?", answer: "Yes, you earn a digital badge that can be shared on LinkedIn." },
+      { question: "Can this lead to a job in cybersecurity?", answer: "It's an excellent first step; many students continue with more advanced CISCO or CompTIA certifications." }
+    ]
+  },
+  // 10
+  {
+    title: "The Science of Happiness (University of California, Berkeley)",
+    provider: "UC Berkeley",
+    platform: "edX",
+    category: "Social Sciences",
+    level: "Beginner",
+    duration: "8 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.edx.org/course/the-science-of-happiness",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format",
+    tags: ["Happiness", "Positive Psychology", "UC Berkeley", "Well-Being", "Mindfulness"],
+    featured: false,
+    description: "Discover what truly makes people happy with the groundbreaking Science of Happiness course from UC Berkeley. Grounded in positive psychology research, you'll learn practical strategies to increase your own well-being and build more meaningful connections. Engage in weekly happiness exercises that have been proven to boost life satisfaction.",
+    instructor: "Dr. Dacher Keltner and Dr. Emiliana Simon-Thomas, UC Berkeley Greater Good Science Center",
+    requirements: ["No prerequisites", "Willingness to try new activities and reflect"],
+    syllabus: [
+      "What is happiness? Definitions and measurement",
+      "The role of social connections in well-being",
+      "Practicing gratitude and savoring",
+      "Mindfulness and meditation techniques",
+      "Compassion, kindness, and empathy",
+      "Finding meaning and purpose in life",
+      "Overcoming anxiety and building resilience",
+      "Creating a personal happiness plan"
+    ],
+    platformDetails: "Part of UC Berkeley’s Greater Good Science Center, a leader in well-being research.",
+    enrolledCount: "600K+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Is this a self-help course?", answer: "It's a science-based course from a top university, not pop psychology." },
+      { question: "Do I need to meditate?", answer: "Meditation is introduced as one technique, but you are free to adapt the exercises to your preferences." }
+    ]
+  },
+  // 11
+  {
+    title: "Environmental Science and Sustainability (University of Illinois)",
+    provider: "University of Illinois",
+    platform: "Coursera",
+    category: "Environmental Studies",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/environmental-science",
+    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1200&auto=format",
+    tags: ["Environmental Science", "Sustainability", "Climate Change", "Ecology", "University of Illinois"],
+    featured: false,
+    description: "Explore the most pressing environmental issues of our time and the solutions that are being developed. This course covers climate change, biodiversity loss, pollution, renewable energy, and sustainable development. You'll learn how science informs policy and what individuals can do to make a difference.",
+    instructor: "Dr. Jonathan Tomkin, Associate Director of the School of Earth, Society & Environment",
+    requirements: ["No science background required", "Interest in environmental issues"],
+    syllabus: [
+      "Earth’s systems and the concept of sustainability",
+      "Climate change: causes, impacts, and mitigation",
+      "Energy resources: fossil fuels, nuclear, and renewables",
+      "Water resources and pollution",
+      "Ecosystems and biodiversity decline",
+      "Waste management and circular economy",
+      "Sustainable agriculture and food systems",
+      "Environmental policy and individual action"
+    ],
+    platformDetails: "Includes real-world case studies and discussions on current environmental news.",
+    enrolledCount: "160K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Is this course politically biased?", answer: "No, it presents scientific evidence and allows learners to form their own opinions." },
+      { question: "Will I learn how to reduce my carbon footprint?", answer: "Yes, the course provides practical tips for sustainable living." }
+    ]
+  },
+  // 12
+  {
+    title: "Blockchain Basics (University at Buffalo)",
+    provider: "University at Buffalo",
+    platform: "Coursera",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/blockchain-basics",
+    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1200&auto=format",
+    tags: ["Blockchain", "Cryptocurrency", "Ethereum", "Smart Contracts", "Beginner"],
+    featured: false,
+    description: "Understand the technology behind Bitcoin, Ethereum, and decentralized applications. This course explains blockchain concepts in simple terms, covering hashing, consensus algorithms, mining, wallets, and smart contracts. Ideal for business professionals, developers, and anyone curious about Web3.",
+    instructor: "Dr. Bina Ramamurthy, Professor of Computer Science",
+    requirements: ["Basic computer literacy", "No programming required"],
+    syllabus: [
+      "What is blockchain? Key concepts and history",
+      "Cryptographic hash functions and digital signatures",
+      "Bitcoin: transactions, mining, and proof of work",
+      "Ethereum and smart contracts",
+      "Consensus mechanisms: PoW vs PoS",
+      "Public and private blockchains",
+      "Decentralized applications (dApps)",
+      "Future of blockchain and enterprise applications"
+    ],
+    platformDetails: "Part of the Blockchain Specialization from University at Buffalo.",
+    enrolledCount: "240K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need to know how to code?", answer: "No, this course is designed for non-programmers as well." },
+      { question: "Will this course teach me how to invest in crypto?", answer: "No, it focuses on the technology, not investment advice." }
+    ]
+  },
+  // 13
+  {
+    title: "AI for Everyone (DeepLearning.AI)",
+    provider: "DeepLearning.AI",
+    platform: "Coursera",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/ai-for-everyone",
+    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?q=80&w=1200&auto=format",
+    tags: ["Artificial Intelligence", "AI", "DeepLearning.AI", "Machine Learning", "Non-technical"],
+    featured: false,
+    description: "Demystify artificial intelligence with Andrew Ng, one of the world’s foremost AI experts. This course is designed for non-technical professionals who want to understand AI terminology, capabilities, and limitations. Learn how to spot opportunities to apply AI in your own organization and navigate the societal implications.",
+    instructor: "Andrew Ng, Founder of DeepLearning.AI and Coursera",
+    requirements: ["No programming or math background required", "Curiosity about AI"],
+    syllabus: [
+      "What is AI? Machine learning, deep learning, data science",
+      "Building AI projects: workflow and team roles",
+      "AI in your company: strategy and implementation",
+      "AI and society: bias, ethics, and jobs",
+      "Case studies from various industries",
+      "How to start an AI project in your organization"
+    ],
+    platformDetails: "DeepLearning.AI is a world-leading provider of AI education.",
+    enrolledCount: "1.1M+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Can a marketing manager benefit from this course?", answer: "Absolutely—AI is being used in marketing, sales, HR, and many other business functions." },
+      { question: "Is this too basic for someone with a tech background?", answer: "It's meant for non-engineers; technical folks may prefer the Deep Learning Specialization." }
+    ]
+  },
+  // 14
+  {
+    title: "Introduction to Music Theory (Berklee College of Music)",
+    provider: "Berklee College of Music",
+    platform: "Coursera",
+    category: "Arts & Design",
+    level: "Beginner",
+    duration: "6 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/edinburgh-music-theory",
+    image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1200&auto=format",
+    tags: ["Music Theory", "Berklee", "Piano", "Composition", "Scales"],
+    featured: false,
+    description: "Learn to read, write, and understand music with Berklee’s free music theory course. No prior musical experience is needed. You'll cover scales, chords, rhythm, and basic composition, and even write your own short piece by the end of the course.",
+    instructor: "George W. Russell, Jr., Professor at Berklee College of Music",
+    requirements: ["No musical experience required", "Access to a piano/keyboard (even a virtual one) helpful but not required"],
+    syllabus: [
+      "Pitch, notes, and the musical alphabet",
+      "Rhythm, meter, and time signatures",
+      "Major and minor scales",
+      "Intervals and chords (triads)",
+      "Chord progressions and harmonic function",
+      "Melody writing and basic composition",
+      "Final project: compose a simple melody"
+    ],
+    platformDetails: "Berklee is the world’s largest independent music college and a leader in contemporary music education.",
+    enrolledCount: "310K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need an instrument?", answer: "A piano or keyboard is recommended but not required; virtual piano apps work too." },
+      { question: "Will I be able to read sheet music after this course?", answer: "Yes, you will learn to read basic notation for pitch and rhythm." }
+    ]
+  },
+  // 15
+  {
+    title: "Digital Marketing (Google Digital Garage)",
+    provider: "Google",
+    platform: "Google Digital Garage",
+    category: "Business",
+    level: "Beginner",
+    duration: "40 hours",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://learndigital.withgoogle.com/digitalgarage/course/digital-marketing",
+    image: "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?q=80&w=1200&auto=format",
+    tags: ["Digital Marketing", "Google", "SEO", "Social Media", "Certificate"],
+    featured: true,
+    description: "Get certified in digital marketing fundamentals from Google. Learn SEO, SEM, social media, analytics, and online advertising from the experts. The course consists of 26 modules covering all major aspects of digital marketing. Upon completion, you receive a certificate recognized by the Interactive Advertising Bureau (IAB) Europe.",
+    instructor: "Google Digital Garage trainers",
+    requirements: ["No marketing experience required", "Access to a computer and internet"],
+    syllabus: [
+      "Introduction to digital marketing",
+      "Search engine optimization (SEO)",
+      "Search engine marketing (SEM) and Google Ads",
+      "Social media marketing: Facebook, Instagram, LinkedIn",
+      "Content marketing and blogging",
+      "Email marketing best practices",
+      "Web analytics and Google Analytics",
+      "Mobile marketing and app promotion",
+      "E-commerce and conversion optimization",
+      "Display and video advertising"
+    ],
+    platformDetails: "Google Digital Garage offers free, high-quality courses designed by Google experts.",
+    enrolledCount: "2.5M+ enrolled",
+    rating: 4.5,
+    faqs: [
+      { question: "Is the certificate recognized by employers?", answer: "Yes, it's co-certified by IAB Europe and valued by digital marketing employers." },
+      { question: "How quickly can I finish the course?", answer: "The course is self-paced; most learners complete it in 2–4 weeks at a few hours per day." }
+    ]
+  },
+  // 16
+  {
+    title: "Introduction to Philosophy (University of Edinburgh)",
+    provider: "University of Edinburgh",
+    platform: "Coursera",
+    category: "Humanities",
+    level: "Beginner",
+    duration: "7 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/philosophy",
+    image: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?q=80&w=1200&auto=format",
+    tags: ["Philosophy", "Critical Thinking", "Ethics", "Logic", "University of Edinburgh"],
+    featured: false,
+    description: "Explore fundamental questions of existence, knowledge, and ethics with leading philosophers from the University of Edinburgh. This course introduces you to the core areas of philosophy: epistemology, metaphysics, ethics, and philosophy of mind. You'll learn to think critically, construct arguments, and evaluate the ideas that have shaped Western thought.",
+    instructor: "Dr. Dave Ward, Dr. Suilin Lavelle, and other faculty members",
+    requirements: ["No philosophical background needed", "Willingness to engage with abstract ideas"],
+    syllabus: [
+      "What is philosophy? Its methods and branches",
+      "Epistemology: what can we know?",
+      "Metaphysics: the nature of reality",
+      "Philosophy of mind: consciousness and the self",
+      "Ethics: moral theories and dilemmas",
+      "Philosophy of science: how science works",
+      "Applied ethics: abortion, animal rights, euthanasia"
+    ],
+    platformDetails: "From the University of Edinburgh, one of the world’s top-ranked universities.",
+    enrolledCount: "680K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Is this course religious?", answer: "No, it's a secular philosophy course covering a wide range of topics." },
+      { question: "Will I learn to argue better?", answer: "Yes, a key skill taught is constructing and evaluating logical arguments." }
+    ]
+  },
+  // 17
+  {
+    title: "Supply Chain Management (Rutgers University)",
+    provider: "Rutgers University",
+    platform: "Coursera",
+    category: "Business",
+    level: "Intermediate",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/supply-chain-management",
+    image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=1200&auto=format",
+    tags: ["Supply Chain", "Logistics", "Operations", "Rutgers", "Business"],
+    featured: false,
+    description: "Learn the key concepts of supply chain management: planning, sourcing, manufacturing, delivery, and returns. This course from Rutgers University covers the entire supply chain lifecycle and introduces best practices used by leading companies like Amazon, Walmart, and Zara. Ideal for business students and professionals seeking to enter the logistics field.",
+    instructor: "Rudolf Leuschner, Ph.D., Associate Professor of Supply Chain Management",
+    requirements: ["Basic understanding of business concepts helpful", "No advanced math required"],
+    syllabus: [
+      "Introduction to supply chain management",
+      "Planning and demand forecasting",
+      "Sourcing and procurement strategies",
+      "Manufacturing and production planning",
+      "Logistics and distribution networks",
+      "Inventory management and warehousing",
+      "Reverse logistics and returns",
+      "Supply chain technology and data analytics"
+    ],
+    platformDetails: "Part of the Supply Chain Management Specialization from Rutgers. Financial aid available.",
+    enrolledCount: "130K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Can I take this course alone?", answer: "Yes, this is a standalone course but also part of a specialization." },
+      { question: "Is this relevant for e-commerce?", answer: "Absolutely—supply chain is critical for online retail, which is heavily covered." }
+    ]
+  },
+  // 18
+  {
+    title: "Android Development for Beginners (Google)",
+    provider: "Google",
+    platform: "Udacity",
+    category: "Computer Science",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: false,
+    officialLink: "https://www.udacity.com/course/android-development-for-beginners--ud837",
+    image: "https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?q=80&w=1200&auto=format",
+    tags: ["Android", "Mobile Development", "Java", "Google", "Beginner App"],
+    featured: false,
+    description: "Build your first Android app with this free course from Google. No programming experience required. You'll learn the basics of Java, XML layouts, and Android Studio, and by the end, you'll have a working app that you can share with friends. Perfect for anyone interested in mobile development.",
+    instructor: "Katherine Kuan, Developer Advocate at Google",
+    requirements: ["No programming experience needed", "A computer capable of running Android Studio"],
+    syllabus: [
+      "Introduction to Android and Android Studio",
+      "Building layouts with XML",
+      "Java basics for Android",
+      "Making an app interactive: buttons and event handling",
+      "Multiple activities and intents",
+      "Lists, adapters, and RecyclerView",
+      "Networking and fetching data from the web",
+      "Building and publishing a simple app"
+    ],
+    platformDetails: "Co-created by Google and Udacity, ensuring you learn the latest best practices.",
+    enrolledCount: "850K+ enrolled",
+    rating: 4.6,
+    faqs: [
+      { question: "Do I need an Android phone to test apps?", answer: "No, you can use the Android emulator included in Android Studio." },
+      { question: "Will I learn Kotlin?", answer: "This older version uses Java, but the concepts transfer easily to Kotlin." }
+    ]
+  },
+  // 19
+  {
+    title: "Introduction to Human Anatomy (University of Michigan)",
+    provider: "University of Michigan",
+    platform: "Coursera",
+    category: "Health & Medicine",
+    level: "Beginner",
+    duration: "4 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/anatomy",
+    image: "https://images.unsplash.com/photo-1559757175-5700dde675bc?q=80&w=1200&auto=format",
+    tags: ["Anatomy", "Human Body", "Medicine", "Physiology", "University of Michigan"],
+    featured: false,
+    description: "Learn the basics of human anatomy through interactive lectures and 3D models covering the major organ systems. This course is perfect for pre-med students, healthcare professionals, and anyone curious about how the human body works.",
+    instructor: "Dr. B. Kathleen Alsup and Dr. Glenn Fox, University of Michigan Medical School",
+    requirements: ["No prior medical knowledge required", "Interest in the human body"],
+    syllabus: [
+      "Introduction to anatomical terminology",
+      "Skeletal system: bones and joints",
+      "Muscular system: major muscle groups",
+      "Cardiovascular system: heart and blood vessels",
+      "Respiratory system: lungs and airways",
+      "Digestive system: from mouth to intestines",
+      "Nervous system: brain, spinal cord, and nerves",
+      "Urinary and reproductive systems"
+    ],
+    platformDetails: "Features 3D interactive models and cadaveric images for realistic learning.",
+    enrolledCount: "170K+ enrolled",
+    rating: 4.8,
+    faqs: [
+      { question: "Is this course suitable for medical students?", answer: "It's an introductory course; medical students may find it a good review but not a substitute for a full anatomy course." },
+      { question: "Are there any graphic images?", answer: "Yes, cadaveric images are used, but they are presented in a respectful, educational context." }
+    ]
+  },
+  // 20
+  {
+    title: "Public Speaking (University of Washington)",
+    provider: "University of Washington",
+    platform: "Coursera",
+    category: "Humanities",
+    level: "Beginner",
+    duration: "5 weeks",
+    language: "English",
+    certificateOffered: true,
+    officialLink: "https://www.coursera.org/learn/public-speaking",
+    image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1200&auto=format",
+    tags: ["Public Speaking", "Communication", "Presentation", "University of Washington", "Speech"],
+    featured: false,
+    description: "Overcome your fear of public speaking and become a confident, compelling speaker. This course from the University of Washington teaches the fundamentals of speech design, delivery techniques, and audience engagement. Practice with peer feedback and record your own speeches for self-assessment.",
+    instructor: "Dr. Matt McGarrity, Senior Lecturer at the University of Washington",
+    requirements: ["Willingness to record and share short speeches", "No prior public speaking experience"],
+    syllabus: [
+      "Speech planning: purpose and audience analysis",
+      "Organizing your speech: structure and transitions",
+      "Supporting your ideas with evidence and stories",
+      "Delivery techniques: voice, body language, eye contact",
+      "Visual aids and slide design",
+      "Handling Q&A and impromptu speaking",
+      "Overcoming speech anxiety",
+      "Final speech: record and submit for peer review"
+    ],
+    platformDetails: "Peer-reviewed assignments mean you get feedback from a global community of learners.",
+    enrolledCount: "340K+ enrolled",
+    rating: 4.7,
+    faqs: [
+      { question: "Do I need a webcam?", answer: "Yes, recording your speeches is a core part of the learning experience." },
+      { question: "How many speeches will I give?", answer: "You will prepare and deliver 3–4 short speeches during the course." }
+    ]
+  }
+];
+seed();

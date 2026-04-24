@@ -26,14 +26,26 @@ export async function generateMetadata({ params }: PageProps) {
 
   const title = `${scholarship.title} | The Open Scholarships`;
   const description = scholarship.description?.substring(0, 160) || '';
+  
+  // Prepare OG parameters (no image URL – pure text card)
   const funding = Array.isArray(scholarship.fundingType)
     ? scholarship.fundingType[0]
     : scholarship.fundingType || 'Fully Funded';
   const host = scholarship.hostCountries?.[0] || 'Various';
   const deadline = new Date(scholarship.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://theopenscholarships.vercel.app';
-  const ogImageUrl = `${baseUrl}/api/og?type=scholarship&title=${encodeURIComponent(scholarship.title)}&description=${encodeURIComponent(description)}&funding=${encodeURIComponent(funding)}&host=${encodeURIComponent(host)}&deadline=${encodeURIComponent(deadline)}&image=${encodeURIComponent(scholarship.image || '')}`;
+  const level = Array.isArray(scholarship.degreeLevel)
+    ? scholarship.degreeLevel[0]
+    : scholarship.degreeLevel || 'All Levels';
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://theopenscholarships.vercel.app';
+  const ogUrl = new URL(`${baseUrl}/api/og`);
+  ogUrl.searchParams.set('type', 'scholarship');
+  ogUrl.searchParams.set('title', scholarship.title);
+  ogUrl.searchParams.set('description', description);
+  ogUrl.searchParams.set('funding', funding);
+  ogUrl.searchParams.set('host', host);
+  ogUrl.searchParams.set('deadline', deadline);
+  ogUrl.searchParams.set('level', level);
 
   return {
     title,
@@ -41,14 +53,16 @@ export async function generateMetadata({ params }: PageProps) {
     openGraph: {
       title,
       description,
+      url: `${baseUrl}/scholarships/${scholarship.slug}`,
+      siteName: 'The Open Scholarships',
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: scholarship.title }],
       type: 'website',
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: scholarship.title }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImageUrl],
+      images: [ogUrl.toString()],
     },
   };
 }

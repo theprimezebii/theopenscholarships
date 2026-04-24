@@ -16,11 +16,16 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+function toPlainObject<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}
+
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   await connectToDatabase();
-  const post = await BlogPost.findOne({ slug, type: 'guide', published: true }).lean();
-  if (!post) return { title: 'Guide Not Found' };
+  const postRaw = await BlogPost.findOne({ slug, type: 'guide', published: true }).lean();
+  if (!postRaw) return { title: 'Guide Not Found' };
+  const post = toPlainObject(postRaw);
   return {
     title: post.title,
     description: post.excerpt,
@@ -37,16 +42,15 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function GuidePage({ params }: PageProps) {
   const { slug } = await params;
   await connectToDatabase();
-  
-  const post = await BlogPost.findOne({ slug, type: 'guide', published: true }).lean();
-  
-  if (!post) {
-    notFound();
-  }
-  
+
+  const postRaw = await BlogPost.findOne({ slug, type: 'guide', published: true }).lean();
+  if (!postRaw) notFound();
+
+  const post = toPlainObject(postRaw);
+
   await BlogPost.updateOne({ slug }, { $inc: { views: 1 } });
-  
-  const relatedGuides = await BlogPost.find({
+
+  const relatedGuidesRaw = await BlogPost.find({
     _id: { $ne: post._id },
     type: 'guide',
     published: true,
@@ -55,8 +59,13 @@ export default async function GuidePage({ params }: PageProps) {
       { tags: { $in: post.tags || [] } }
     ]
   }).limit(3).lean();
+  const relatedGuides = relatedGuidesRaw.map(g => toPlainObject(g));
 
-  // Hero background style
+  const plainFaqs = post.faqs?.map((faq: any) => ({
+    question: faq.question,
+    answer: faq.answer,
+  })) || [];
+
   const heroBackgroundStyle = post.image
     ? {
         backgroundImage: `linear-gradient(135deg, rgba(11, 59, 47, 0.85), rgba(26, 93, 74, 0.85)), url(${post.image})`,
@@ -71,7 +80,6 @@ export default async function GuidePage({ params }: PageProps) {
     <>
       <ReadingProgress /><Header />
       <main className="min-h-screen bg-white">
-        {/* Hero Section with Image Background */}
         <div className="relative text-white overflow-hidden" style={heroBackgroundStyle}>
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
             <Link href="/guides" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors">
@@ -103,7 +111,6 @@ export default async function GuidePage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-between mb-8">
             <div className="flex gap-3">
@@ -111,11 +118,11 @@ export default async function GuidePage({ params }: PageProps) {
               <PrintButton />
             </div>
           </div>
-          
+
           <article className="prose prose-lg max-w-none">
             <BlogContent content={post.content} />
           </article>
-          
+
           {post.tags && post.tags.length > 0 && (
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
@@ -131,13 +138,13 @@ export default async function GuidePage({ params }: PageProps) {
               </div>
             </div>
           )}
-          
-          {post.faqs && post.faqs.length > 0 && (
+
+          {plainFaqs.length > 0 && (
             <div className="mt-8">
-              <FaqAccordion items={post.faqs} />
+              <FaqAccordion items={plainFaqs} />
             </div>
           )}
-          
+
           {relatedGuides.length > 0 && (
             <div className="mt-12 pt-8 border-t border-gray-200">
               <h2 className="font-serif text-2xl font-semibold mb-6">Related Guides</h2>
@@ -161,7 +168,7 @@ export default async function GuidePage({ params }: PageProps) {
             </div>
           )}
         </div>
-        
+
         <Newsletter />
       </main>
       <Footer />

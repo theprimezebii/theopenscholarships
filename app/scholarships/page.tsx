@@ -93,14 +93,14 @@ export default function ScholarshipsPage() {
 
   const hasActiveFilters = useCallback(() => {
     return selectedCountries.length > 0 ||
-           selectedDisciplines.length > 0 ||
-           selectedDegree !== '' ||
-           selectedFunding !== '' ||
-           selectedRegion !== '' ||
-           searchQuery !== '' ||
-           selectedProgramMode !== '' ||
-           selectedProgramDuration !== '' ||
-           selectedProgramLevel !== '';
+      selectedDisciplines.length > 0 ||
+      selectedDegree !== '' ||
+      selectedFunding !== '' ||
+      selectedRegion !== '' ||
+      searchQuery !== '' ||
+      selectedProgramMode !== '' ||
+      selectedProgramDuration !== '' ||
+      selectedProgramLevel !== '';
   }, [selectedCountries, selectedDisciplines, selectedDegree, selectedFunding, selectedRegion, searchQuery, selectedProgramMode, selectedProgramDuration, selectedProgramLevel]);
 
   // Set mounted
@@ -124,44 +124,44 @@ export default function ScholarshipsPage() {
   }, []);
 
   // Build query string and store in ref to prevent dependency churn
- const queryString = useMemo(() => {
-  const params = new URLSearchParams();
-  if (selectedCountries.length) params.set('countries', selectedCountries.join(','));
-  if (selectedDisciplines.length) params.set('disciplines', selectedDisciplines.join(','));
-  if (selectedDegree) params.set('degree', selectedDegree);
-  if (selectedFunding) params.set('funding', selectedFunding);
-  if (selectedRegion) params.set('region', selectedRegion);
-  if (searchQuery) params.set('search', searchQuery);
-  if (selectedProgramMode) params.set('programMode', selectedProgramMode);
-  if (selectedProgramDuration) params.set('programDuration', selectedProgramDuration);
-  if (selectedProgramLevel) params.set('programLevel', selectedProgramLevel);
-  params.set('page', currentPage.toString());
-  params.set('limit', ITEMS_PER_PAGE.toString());
-  return params.toString();
-}, [selectedCountries, selectedDisciplines, selectedDegree, selectedFunding, selectedRegion, searchQuery, selectedProgramMode, selectedProgramDuration, selectedProgramLevel, currentPage]);
+  const queryString = useMemo(() => {
+    const params = new URLSearchParams();
+    if (selectedCountries.length) params.set('countries', selectedCountries.join(','));
+    if (selectedDisciplines.length) params.set('disciplines', selectedDisciplines.join(','));
+    if (selectedDegree) params.set('degree', selectedDegree);
+    if (selectedFunding) params.set('funding', selectedFunding);
+    if (selectedRegion) params.set('region', selectedRegion);
+    if (searchQuery) params.set('search', searchQuery);
+    if (selectedProgramMode) params.set('programMode', selectedProgramMode);
+    if (selectedProgramDuration) params.set('programDuration', selectedProgramDuration);
+    if (selectedProgramLevel) params.set('programLevel', selectedProgramLevel);
+    params.set('page', currentPage.toString());
+    params.set('limit', ITEMS_PER_PAGE.toString());
+    return params.toString();
+  }, [selectedCountries, selectedDisciplines, selectedDegree, selectedFunding, selectedRegion, searchQuery, selectedProgramMode, selectedProgramDuration, selectedProgramLevel, currentPage]);
 
   const fetchScholarships = useCallback(async () => {
-  if (!mounted || fetchingRef.current) return;
-  fetchingRef.current = true;
-  setLoading(true);
-  try {
-    const res = await fetch(`/api/scholarships/filter?${queryString}`);
-    const data = await res.json();
-    setScholarships(data.scholarships || []);
-    setTotal(data.total || 0);
-  } catch (error) {
-    console.error('Failed to fetch scholarships:', error);
-  } finally {
-    setLoading(false);
-    fetchingRef.current = false;
-  }
-}, [mounted, queryString]);
+    if (!mounted || fetchingRef.current) return;
+    fetchingRef.current = true;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/scholarships/filter?${queryString}`);
+      const data = await res.json();
+      setScholarships(data.scholarships || []);
+      setTotal(data.total || 0);
+    } catch (error) {
+      console.error('Failed to fetch scholarships:', error);
+    } finally {
+      setLoading(false);
+      fetchingRef.current = false;
+    }
+  }, [mounted, queryString]);
 
   // Fetch when the query string ref changes (i.e., filters or page change)
- useEffect(() => {
-  if (!mounted) return;
-  fetchScholarships();
-}, [fetchScholarships, mounted]);
+  useEffect(() => {
+    if (!mounted) return;
+    fetchScholarships();
+  }, [fetchScholarships, mounted]);
 
   // Sync search input with URL
   useEffect(() => {
@@ -583,16 +583,66 @@ export default function ScholarshipsPage() {
           </div>
 
           {/* Mobile Filter Button */}
-          <div className="lg:hidden mb-4">
-            <button
-              onClick={() => setShowMobileFilters(true)}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-gray-700 font-medium"
-            >
-              <Filter className="w-5 h-5" />
-              Filters {totalFiltersApplied > 0 && `(${totalFiltersApplied})`}
+          {/* Mobile Filter Button – centered, auto width, matches courses */}
+          <div className="lg:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
+            <button onClick={() => setShowMobileFilters(true)}
+              className="bg-[#0B3B2F] text-white px-6 py-3 rounded-lg font-medium shadow-lg flex items-center gap-2">
+              <Filter className="w-5 h-5" /> Filters {totalFiltersApplied > 0 && `(${totalFiltersApplied})`}
             </button>
           </div>
-
+          {/* Mobile Active Filters */}
+          {totalFiltersApplied > 0 && (
+            <div className="lg:hidden flex flex-wrap gap-2 mb-4">
+              {selectedCountries.map(country => (
+                <span key={country} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {country} <button onClick={() => removeFilter('country', country)} className="hover:text-red-500">×</button>
+                </span>
+              ))}
+              {selectedDisciplines.map(discipline => (
+                <span key={discipline} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {discipline} <button onClick={() => removeFilter('discipline', discipline)} className="hover:text-red-500">×</button>
+                </span>
+              ))}
+              {selectedDegree && (
+                <span className="bg-purple-50 text-purple-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {selectedDegree} <button onClick={() => removeFilter('degree', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+              {selectedFunding && (
+                <span className="bg-teal-50 text-teal-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {selectedFunding} <button onClick={() => removeFilter('funding', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+              {selectedRegion && (
+                <span className="bg-amber-50 text-amber-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {selectedRegion} <button onClick={() => removeFilter('region', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+              {selectedProgramMode && (
+                <span className="bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {programModeOptions.find(o => o.value === selectedProgramMode)?.label}
+                  <button onClick={() => removeFilter('programMode', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+              {selectedProgramDuration && (
+                <span className="bg-cyan-50 text-cyan-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {programDurationOptions.find(o => o.value === selectedProgramDuration)?.label}
+                  <button onClick={() => removeFilter('programDuration', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+              {selectedProgramLevel && (
+                <span className="bg-pink-50 text-pink-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {programLevelOptions.find(o => o.value === selectedProgramLevel)?.label}
+                  <button onClick={() => removeFilter('programLevel', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+              {searchQuery && (
+                <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  "{searchQuery}" <button onClick={() => removeFilter('search', '')} className="hover:text-red-500">×</button>
+                </span>
+              )}
+            </div>
+          )}
           {/* Result Count */}
           {hasActiveFilters() && (
             <div className="mb-4">
@@ -620,9 +670,9 @@ export default function ScholarshipsPage() {
                     {scholarships.map((scholarship) => {
                       const normalized = normalizeScholarship(scholarship);
                       return (
-                        <ScholarshipCard 
-                          key={scholarship._id} 
-                          scholarship={normalized as any} 
+                        <ScholarshipCard
+                          key={scholarship._id}
+                          scholarship={normalized as any}
                         />
                       );
                     })}

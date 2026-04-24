@@ -14,11 +14,41 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
   const { country } = await params;
   const decodedCountry = decodeURIComponent(country);
+  
+  await connectToDatabase();
+  const totalCount = await Scholarship.countDocuments({ hostCountries: decodedCountry });
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://theopenscholarships.vercel.app';
+  const title = `Scholarships in ${decodedCountry} | The Open Scholarships`;
+  const description = `Discover ${totalCount}+ fully funded scholarships and study opportunities in ${decodedCountry}. Apply now for Bachelor, Master, and PhD programs.`;
+
+  const ogUrl = new URL(`${baseUrl}/api/og`);
+  ogUrl.searchParams.set('type', 'country');
+  ogUrl.searchParams.set('title', `Scholarships in ${decodedCountry}`);
+  ogUrl.searchParams.set('description', description.substring(0, 150));
+  ogUrl.searchParams.set('host', decodedCountry);
+  ogUrl.searchParams.set('funding', `${totalCount} opportunities`);
+
   return {
-    title: `Scholarships in ${decodedCountry} | TheOpenScholarships`,
-    description: `Discover fully funded scholarships and study opportunities in ${decodedCountry}.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}/countries/${encodeURIComponent(decodedCountry)}`,
+      siteName: 'The Open Scholarships',
+      images: [{ url: ogUrl.toString(), width: 1200, height: 630, alt: decodedCountry }],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogUrl.toString()],
+    },
   };
 }
+
 
 function getDeadlineHint(deadline: Date): string {
   const month = deadline.getMonth();

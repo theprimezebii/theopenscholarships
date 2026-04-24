@@ -40,7 +40,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="bg-gradient-to-r from-[#0B3B2F] to-[#1A5D4A] text-white py-16">
+    <section className="bg-[#0B3B2F] text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-2xl">
         <h2 className="font-serif text-3xl md:text-4xl mb-3">Get weekly scholarship alerts</h2>
         <p className="text-white/70 mb-6">New scholarships every Monday. Zero spam. Unsubscribe anytime.</p>

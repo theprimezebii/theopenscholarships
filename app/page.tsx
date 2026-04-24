@@ -8,11 +8,15 @@ import StatCard from '@/components/StatCard';
 import { connectToDatabase } from '@/lib/mongodb';
 import Scholarship from '@/models/Scholarship';
 import BlogPost from '@/models/BlogPost';
+import Course from '@/models/Course';
+import CourseCard from '@/components/CourseCard';
+// import type { Metadata } from 'next';
 import {
   Search, GraduationCap, MapPin, Building2, Users, BookOpen,
   ArrowRight, TrendingUp, Calendar, FileText, ChevronRight, Clock,
   Microscope, Palette, Scale, Briefcase, Cpu, HeartPulse, Leaf
 } from 'lucide-react';
+import { Metadata } from 'next';
 
 const STATS = {
   scholarships: '2.5K+',
@@ -29,35 +33,37 @@ function formatNumber(num: number): string {
 
 async function getHomePageData() {
   await connectToDatabase();
-  
+  // Fetch featured courses (or latest if none featured)
+  const featuredCourses = await Course.find({ featured: true }).limit(4).lean();
   const featuredScholarships = await Scholarship.find({ featured: true, status: 'open' })
     .limit(8)
     .lean();
-  
+
   const blogPosts = await BlogPost.find({ published: true, type: { $ne: 'guide' } })
     .sort({ createdAt: -1 })
     .limit(8)
     .lean();
-  
+
   const topFields = await Scholarship.aggregate([
     { $unwind: '$fields' },
     { $group: { _id: '$fields', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 8 }
   ]);
-  
+
   const popularCountries = await Scholarship.aggregate([
     { $unwind: '$hostCountries' },
     { $group: { _id: '$hostCountries', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 8 }
   ]);
-  
+
   return {
     featuredScholarships,
     blogPosts,
     topFields: topFields.map(f => ({ name: f._id, count: f.count })),
-    popularCountries: popularCountries.map(c => ({ name: c._id, count: c.count }))
+    popularCountries: popularCountries.map(c => ({ name: c._id, count: c.count })),
+    featuredCourses
   };
 }
 
@@ -87,10 +93,39 @@ const countryImages: Record<string, string> = {
 };
 
 const heroImageUrl = 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1920&auto=format';
-
+export const metadata: Metadata = {
+  title: {
+    default: 'The Open Scholarships | Free Fully Funded Opportunities',
+    template: '%s | The Open Scholarships',
+  },
+  description: 'Find your perfect fully funded scholarship abroad. Discover verified opportunities from top universities worldwide – free, no ads, completely accessible.',
+  openGraph: {
+    title: 'The Open Scholarships – Fully Funded Opportunities Worldwide',
+    description: 'Search by country, field of study, or degree level. Thousands of verified scholarships for Bachelor, Master, and PhD programs.',
+    url: 'https://theopenscholarships.com',
+    siteName: 'The Open Scholarships',
+    images: [
+      {
+        url: 'https://theopenscholarships.com/api/og?type=home',
+        width: 1200,
+        height: 630,
+        alt: 'The Open Scholarships - Find Your Perfect Fully Funded Scholarship',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Open Scholarships – Fully Funded Opportunities',
+    description: 'Discover verified scholarships from top universities worldwide. Search by country, field, or degree level – absolutely free.',
+    images: ['https://theopenscholarships.com/api/og?type=home'],
+  },
+  robots: 'index, follow',
+  keywords: 'scholarships, fully funded, study abroad, free education, international students',
+};
 export default async function Home() {
-  const { featuredScholarships, blogPosts, topFields, popularCountries } = await getHomePageData();
-  
+  const { featuredScholarships, blogPosts, topFields, popularCountries, featuredCourses } = await getHomePageData();
+
   return (
     <>
       <Header />
@@ -239,7 +274,7 @@ export default async function Home() {
             ) : (
               <>
                 <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {featuredScholarships.slice(0,4).map((s: any) => <ScholarshipCard key={s._id} scholarship={s} featured />)}
+                  {featuredScholarships.slice(0, 4).map((s: any) => <ScholarshipCard key={s._id} scholarship={s} featured />)}
                 </div>
                 <div className="md:hidden overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
                   <div className="flex gap-4 w-max">
@@ -250,7 +285,40 @@ export default async function Home() {
             )}
           </div>
         </section>
-
+        {/* Featured Free Courses */}
+        <section className="py-12 md:py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-end mb-6 md:mb-8">
+              <div>
+                <h2 className="font-serif text-2xl md:text-4xl text-[#1A1A1A] mb-1">Free Online Courses</h2>
+                <p className="text-sm md:text-base text-gray-500">Learn from top platforms at no cost</p>
+              </div>
+              <Link href="/courses" className="text-[#0B3B2F] text-sm md:text-base font-medium hover:text-[#D4A373] flex items-center gap-1">
+                View all <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            {featuredCourses.length === 0 ? (
+              <div className="bg-white rounded-xl border p-8 text-center">No featured courses yet. Add some in the admin panel!</div>
+            ) : (
+              <>
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {featuredCourses.slice(0, 4).map((course: any) => (
+                    <CourseCard key={course._id} course={course} />
+                  ))}
+                </div>
+                <div className="md:hidden overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                  <div className="flex gap-4 w-max">
+                    {featuredCourses.map((course: any) => (
+                      <div key={course._id} className="snap-start w-80">
+                        <CourseCard course={course} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
         {/* Popular Destinations */}
         <section className="py-12 md:py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -264,15 +332,15 @@ export default async function Home() {
               </Link>
             </div>
             <div className="hidden md:grid md:grid-cols-4 gap-4">
-              {popularCountries.slice(0,4).map((country) => {
+              {popularCountries.slice(0, 4).map((country) => {
                 const img = countryImages[country.name] || countryImages.default;
                 return (
                   <Link key={country.name} href={`/countries/${encodeURIComponent(country.name)}`}>
                     <div className="group relative h-36 rounded-xl overflow-hidden shadow-sm hover:shadow-lg">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10" />
-                      <CardImage 
-                        src={img} 
-                        alt={country.name} 
+                      <CardImage
+                        src={img}
+                        alt={country.name}
                         fallbackText={country.name}
                         height="h-36"
                       />
@@ -293,9 +361,9 @@ export default async function Home() {
                     <Link key={country.name} href={`/countries/${encodeURIComponent(country.name)}`} className="snap-start w-40">
                       <div className="group relative h-32 rounded-xl overflow-hidden shadow-sm">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10" />
-                        <CardImage 
-                          src={img} 
-                          alt={country.name} 
+                        <CardImage
+                          src={img}
+                          alt={country.name}
                           fallbackText={country.name}
                           height="h-32"
                         />
@@ -329,12 +397,12 @@ export default async function Home() {
             ) : (
               <>
                 <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {blogPosts.slice(0,4).map((post: any) => (
+                  {blogPosts.slice(0, 4).map((post: any) => (
                     <Link key={post._id} href={`/blog/${post.slug}`}>
                       <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg border h-full flex flex-col">
-                        <CardImage 
-                          src={post.image || ''} 
-                          alt={post.title} 
+                        <CardImage
+                          src={post.image || ''}
+                          alt={post.title}
                           fallbackText={post.title}
                           height="h-40"
                         />
@@ -358,9 +426,9 @@ export default async function Home() {
                     {blogPosts.map((post: any) => (
                       <Link key={post._id} href={`/blog/${post.slug}`} className="snap-start w-72">
                         <div className="group bg-white rounded-xl overflow-hidden shadow-sm border h-full flex flex-col">
-                          <CardImage 
-                            src={post.image || ''} 
-                            alt={post.title} 
+                          <CardImage
+                            src={post.image || ''}
+                            alt={post.title}
                             fallbackText={post.title}
                             height="h-36"
                           />

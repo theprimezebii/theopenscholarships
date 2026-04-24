@@ -4,7 +4,6 @@ export const runtime = 'nodejs';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import BlogPostForm from '@/components/admin/BlogPostForm';
 
@@ -12,16 +11,8 @@ export default function EditBlogPostPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const res = await fetch('/api/admin/check');
-      if (!res.ok) router.push('/admin/login');
-    };
-    checkAuth();
-  }, []);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -29,15 +20,7 @@ export default function EditBlogPostPage() {
         const res = await fetch(`/api/blog/posts/${id}`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
-        // Clean faqs: remove _id to avoid serialization issues
-        const cleanedFaqs = (data.faqs || []).map((f: any) => ({
-          question: f.question,
-          answer: f.answer
-        }));
-        setInitialData({
-          ...data,
-          faqs: cleanedFaqs,
-        });
+        setInitialData(data);
       } catch (error) {
         alert('Failed to load post');
         router.push('/admin/blog');
@@ -46,7 +29,7 @@ export default function EditBlogPostPage() {
       }
     };
     fetchPost();
-  }, [id]);
+  }, [id, router]);
 
   const handleSubmit = async (formData: any) => {
     const res = await fetch(`/api/blog/posts/${id}`, {
@@ -74,12 +57,13 @@ export default function EditBlogPostPage() {
 
   return (
     <AdminLayout title="Edit Blog Post">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6">
-          <Link href="/admin/blog" className="text-[#0B3B2F] text-sm">← Back to Blog</Link>
-        </div>
+      <div className="max-w-3xl mx-auto">
         {initialData && (
-          <BlogPostForm initialData={initialData} onSubmit={handleSubmit} submitLabel="Update Post" />
+          <BlogPostForm
+            initialData={initialData}
+            onSubmit={handleSubmit}
+            submitLabel="Update Post"
+          />
         )}
       </div>
     </AdminLayout>

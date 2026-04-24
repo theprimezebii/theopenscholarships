@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '25');
   const search = searchParams.get('search') || '';
   const status = searchParams.get('status');
+  const country = searchParams.get('country') || '';          // ✅ read country
   const sortField = searchParams.get('sortField') || 'deadline';
   const sortOrder = searchParams.get('sortOrder') === 'desc' ? -1 : 1;
   const skip = (page - 1) * limit;
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
     ];
   }
   if (status) query.status = status;
+  if (country) query.hostCountries = { $in: [country] };                // ✅ filter by country
 
   let sort: any = {};
   if (sortField === 'country') sort['hostCountries.0'] = sortOrder;
