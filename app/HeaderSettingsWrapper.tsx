@@ -8,24 +8,12 @@ export default function HeaderSettingsWrapper({ children }: { children: React.Re
   useEffect(() => {
     fetch('/api/site-settings')
       .then(res => res.json())
-      .then(data => {
-        setSettings(data);
-        // Dynamically set favicon if an uploaded URL exists
-        if (data.favicon && data.favicon.trim()) {
-          let link = document.querySelector("link[rel~='icon']");
-          if (!link) {
-            link = document.createElement('link');
-            (link as any).rel = 'icon';
-            document.head.appendChild(link);
-          }
-          (link as HTMLLinkElement).href = data.favicon;
-        }
-      })
+      .then(data => setSettings(data))
       .catch(() => setSettings(null));
   }, []);
 
   if (!settings) {
-    // Still render children to avoid FOUC; default favicon will be shown until fetch completes
+    // Render children immediately, no favicon manipulation
     return <>{children}</>;
   }
 

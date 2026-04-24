@@ -47,4 +47,5 @@ SiteSettingsSchema.pre('save', async function() {
   }
 });
 
+// Important: export **SiteSettings** (plural) – exactly matches the model name
 export default mongoose.models.SiteSettings || mongoose.model('SiteSettings', SiteSettingsSchema);
