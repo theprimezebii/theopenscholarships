@@ -2,21 +2,20 @@
 import { useEffect, useState } from 'react';
 import { HeaderSettingsProvider } from '@/context/HeaderSettingsContext';
 
-interface SiteSettings {
-  headerLogo?: string;
-  headerBgColor?: string;
-  headerTextColor?: string;
-  headerNameColor1?: string;
-  headerNameColor2?: string;
-  displayNameWithLogo?: boolean;
-  siteName?: string;
+interface HeaderSettings {
+  headerLogo: string | null;
+  headerBgColor: string | null;
+  headerTextColor: string | null;
+  headerNameColor1: string | null;
+  headerNameColor2: string | null;
+  displayNameWithLogo: boolean | null;
+  siteName: string | null;
   favicon?: string;
-  [key: string]: any;
 }
 
 export default function HeaderSettingsWrapper({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<SiteSettings>({
-    headerLogo: '',
+  const [settings, setSettings] = useState<HeaderSettings>({
+    headerLogo: null,
     headerBgColor: '#FFFFFF',
     headerTextColor: '#1A1A1A',
     headerNameColor1: '#0B3B2F',
