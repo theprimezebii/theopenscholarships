@@ -1,94 +1,54 @@
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import './globals.css';
-import SessionProviderWrapper from '@/components/SessionProviderWrapper';
-import PlausibleAnalytics from './plausible';
-import { connectToDatabase } from '@/lib/mongodb';
-import SiteSettings from '@/models/SiteSettings';
 import { HeaderSettingsProvider } from '@/context/HeaderSettingsContext';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
-});
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  themeColor: '#0B3B2F',
+export const metadata: Metadata = {
+  title: {
+    default: 'The Open Scholarships – Fully Funded Opportunities Worldwide',
+    template: '%s | The Open Scholarships',
+  },
+  description: 'Find your perfect fully funded scholarship abroad. Discover verified opportunities from top universities – free, no ads, completely accessible.',
+  openGraph: {
+    title: 'The Open Scholarships – Fully Funded Opportunities',
+    description: 'Search by country, field of study, or degree level. Thousands of verified scholarships for Bachelor, Master, and PhD programs.',
+    url: baseUrl,
+    siteName: 'The Open Scholarships',
+    images: [
+      {
+        url: `${baseUrl}/api/og?type=home&title=The+Open+Scholarships&description=Find+your+perfect+fully+funded+scholarship+abroad.`,
+        width: 1200,
+        height: 630,
+        alt: 'The Open Scholarships',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Open Scholarships – Fully Funded Opportunities',
+    description: 'Discover verified scholarships from top universities worldwide. Absolutely free.',
+    images: [`${baseUrl}/api/og?type=home&title=The+Open+Scholarships&description=Find+your+perfect+fully+funded+scholarship+abroad.`],
+  },
+  robots: 'index, follow',
+  keywords: 'scholarships, fully funded, study abroad, free education, international students',
 };
 
-export async function generateMetadata(): Promise<Metadata> {
-  await connectToDatabase();
-  const settings = await SiteSettings.findOne().lean();
-  const siteName = settings?.siteName?.replace(/\s+/g, '') || 'TheOpenScholarships';
-  const favicon = settings?.favicon || 'https://res.cloudinary.com/dzua18qj3/image/upload/v1776687002/theopenscholarships/fkr3nmyvldmx8xanru0z.png';
-
-  return {
-    title: {
-      default: `${siteName} | Fully Funded Scholarships for International Students`,
-      template: `%s | ${siteName}`,
-    },
-    description: 'Discover verified fully funded scholarships from top universities worldwide.',
-    keywords: ['fully funded scholarships', 'study abroad', 'international students', 'scholarships 2026', 'masters scholarships', 'PhD funding'],
-    authors: [{ name: siteName, url: 'https://theopenscholarships.com' }],
-    robots: 'index, follow',
-    openGraph: {
-      title: `${siteName} | Fully Funded Scholarships`,
-      description: 'Find and apply to fully funded scholarships worldwide. Free forever.',
-      type: 'website',
-      locale: 'en_US',
-      siteName: siteName,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${siteName} | Fully Funded Scholarships`,
-      description: 'Find and apply to fully funded scholarships worldwide. Free forever.',
-    },
-    icons: {
-      icon: favicon,
-      shortcut: favicon,
-      apple: favicon,
-    },
-  };
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
-  await connectToDatabase();
-  const settings = await SiteSettings.findOne().lean();
-
-  const headerSettings = {
-    headerLogo: settings?.headerLogo || settings?.logo || null,
-    headerBgColor: settings?.headerBgColor || '#FFFFFF',
-    headerTextColor: settings?.headerTextColor || '#1A1A1A',
-    headerNameColor1: settings?.headerNameColor1 || settings?.siteNameColor1 || '#0B3B2F',
-    headerNameColor2: settings?.headerNameColor2 || settings?.siteNameColor2 || '#D4A373',
-    siteName: settings?.siteName || 'TheOpenScholarships',
-    displayNameWithLogo: settings?.displayNameWithLogo ?? false,
-  };
-
-  const logoUrl = headerSettings.headerLogo;
-
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <head>
-        {logoUrl && <link rel="preload" href={logoUrl} as="image" />}
-      </head>
-      <body className="font-sans bg-[#FAF9F7] text-[#1A1A1A] antialiased" suppressHydrationWarning>
-        <PlausibleAnalytics />
-        <HeaderSettingsProvider value={headerSettings}>
-          <SessionProviderWrapper>{children}</SessionProviderWrapper>
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+      <body className="font-sans antialiased">
+        <HeaderSettingsProvider>
+          {children}
         </HeaderSettingsProvider>
       </body>
     </html>
