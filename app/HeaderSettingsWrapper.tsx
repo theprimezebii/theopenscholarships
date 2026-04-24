@@ -2,20 +2,22 @@
 import { useEffect, useState } from 'react';
 import { HeaderSettingsProvider } from '@/context/HeaderSettingsContext';
 
+// This type must match exactly what HeaderSettingsContext expects.
+// Based on the error, it expects string (not null) for these fields.
 interface HeaderSettings {
-  headerLogo: string | null;
-  headerBgColor: string | null;
-  headerTextColor: string | null;
-  headerNameColor1: string | null;
-  headerNameColor2: string | null;
-  displayNameWithLogo: boolean | null;
-  siteName: string | null;
+  headerLogo: string;
+  headerBgColor: string;
+  headerTextColor: string;
+  headerNameColor1: string;
+  headerNameColor2: string;
+  displayNameWithLogo: boolean;
+  siteName: string;
   favicon?: string;
 }
 
 export default function HeaderSettingsWrapper({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<HeaderSettings>({
-    headerLogo: null,
+    headerLogo: '',
     headerBgColor: '#FFFFFF',
     headerTextColor: '#1A1A1A',
     headerNameColor1: '#0B3B2F',
@@ -28,7 +30,18 @@ export default function HeaderSettingsWrapper({ children }: { children: React.Re
     fetch('/api/site-settings')
       .then(res => res.json())
       .then(data => {
-        setSettings(prev => ({ ...prev, ...data }));
+        // Merge with defaults, ensuring we never pass null to required fields
+        setSettings(prev => ({
+          ...prev,
+          ...data,
+          headerLogo: data.headerLogo ?? prev.headerLogo,
+          headerBgColor: data.headerBgColor ?? prev.headerBgColor,
+          headerTextColor: data.headerTextColor ?? prev.headerTextColor,
+          headerNameColor1: data.headerNameColor1 ?? prev.headerNameColor1,
+          headerNameColor2: data.headerNameColor2 ?? prev.headerNameColor2,
+          displayNameWithLogo: data.displayNameWithLogo ?? prev.displayNameWithLogo,
+          siteName: data.siteName ?? prev.siteName,
+        }));
         if (data.favicon && data.favicon.trim()) {
           let link = document.querySelector("link[rel~='icon']");
           if (!link) {
